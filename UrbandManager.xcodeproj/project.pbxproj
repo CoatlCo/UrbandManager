@@ -15,7 +15,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		506049B11DD846F400AC781F /* UrbandManage.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UrbandManage.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		506049B11DD846F400AC781F /* UrbandManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UrbandManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		506049B41DD846F400AC781F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		506049B61DD846F400AC781F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		506049B91DD846F400AC781F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -38,7 +38,7 @@
 		506049A81DD846F400AC781F = {
 			isa = PBXGroup;
 			children = (
-				506049B31DD846F400AC781F /* UrbandManage */,
+				506049B31DD846F400AC781F /* UrbandManager */,
 				506049B21DD846F400AC781F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -46,12 +46,12 @@
 		506049B21DD846F400AC781F /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				506049B11DD846F400AC781F /* UrbandManage.app */,
+				506049B11DD846F400AC781F /* UrbandManager.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		506049B31DD846F400AC781F /* UrbandManage */ = {
+		506049B31DD846F400AC781F /* UrbandManager */ = {
 			isa = PBXGroup;
 			children = (
 				506049B41DD846F400AC781F /* AppDelegate.swift */,
@@ -61,15 +61,16 @@
 				506049BD1DD846F400AC781F /* LaunchScreen.storyboard */,
 				506049C01DD846F400AC781F /* Info.plist */,
 			);
+			name = UrbandManager;
 			path = UrbandManage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		506049B01DD846F400AC781F /* UrbandManage */ = {
+		506049B01DD846F400AC781F /* UrbandManager */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 506049C31DD846F400AC781F /* Build configuration list for PBXNativeTarget "UrbandManage" */;
+			buildConfigurationList = 506049C31DD846F400AC781F /* Build configuration list for PBXNativeTarget "UrbandManager" */;
 			buildPhases = (
 				506049AD1DD846F400AC781F /* Sources */,
 				506049AE1DD846F400AC781F /* Frameworks */,
@@ -79,9 +80,9 @@
 			);
 			dependencies = (
 			);
-			name = UrbandManage;
+			name = UrbandManager;
 			productName = UrbandManage;
-			productReference = 506049B11DD846F400AC781F /* UrbandManage.app */;
+			productReference = 506049B11DD846F400AC781F /* UrbandManager.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -101,7 +102,7 @@
 					};
 				};
 			};
-			buildConfigurationList = 506049AC1DD846F400AC781F /* Build configuration list for PBXProject "UrbandManage" */;
+			buildConfigurationList = 506049AC1DD846F400AC781F /* Build configuration list for PBXProject "UrbandManager" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -114,7 +115,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				506049B01DD846F400AC781F /* UrbandManage */,
+				506049B01DD846F400AC781F /* UrbandManager */,
 			);
 		};
 /* End PBXProject section */
@@ -261,6 +262,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FVV346K52C;
 				INFOPLIST_FILE = UrbandManage/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManage;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -274,6 +276,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FVV346K52C;
 				INFOPLIST_FILE = UrbandManage/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManage;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -284,7 +287,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		506049AC1DD846F400AC781F /* Build configuration list for PBXProject "UrbandManage" */ = {
+		506049AC1DD846F400AC781F /* Build configuration list for PBXProject "UrbandManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				506049C11DD846F400AC781F /* Debug */,
@@ -293,13 +296,14 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		506049C31DD846F400AC781F /* Build configuration list for PBXNativeTarget "UrbandManage" */ = {
+		506049C31DD846F400AC781F /* Build configuration list for PBXNativeTarget "UrbandManager" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				506049C41DD846F400AC781F /* Debug */,
 				506049C51DD846F400AC781F /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
