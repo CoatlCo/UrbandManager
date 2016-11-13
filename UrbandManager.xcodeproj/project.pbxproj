@@ -7,21 +7,21 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		506049B51DD846F400AC781F /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506049B41DD846F400AC781F /* AppDelegate.swift */; };
-		506049B71DD846F400AC781F /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 506049B61DD846F400AC781F /* ViewController.swift */; };
-		506049BA1DD846F400AC781F /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 506049B81DD846F400AC781F /* Main.storyboard */; };
-		506049BC1DD846F400AC781F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 506049BB1DD846F400AC781F /* Assets.xcassets */; };
-		506049BF1DD846F400AC781F /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 506049BD1DD846F400AC781F /* LaunchScreen.storyboard */; };
+		501123431DD8C18E004F5DB9 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502845DF1DD8BEC10092D6D0 /* ViewController.swift */; };
+		501123441DD8C190004F5DB9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502845D81DD8BEC10092D6D0 /* AppDelegate.swift */; };
+		502845E11DD8BEC10092D6D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 502845D91DD8BEC10092D6D0 /* Assets.xcassets */; };
+		502845E21DD8BEC10092D6D0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 502845DA1DD8BEC10092D6D0 /* LaunchScreen.storyboard */; };
+		502845E31DD8BEC10092D6D0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 502845DC1DD8BEC10092D6D0 /* Main.storyboard */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		502845D81DD8BEC10092D6D0 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		502845D91DD8BEC10092D6D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		502845DB1DD8BEC10092D6D0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		502845DD1DD8BEC10092D6D0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		502845DE1DD8BEC10092D6D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		502845DF1DD8BEC10092D6D0 /* ViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
 		506049B11DD846F400AC781F /* UrbandManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UrbandManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		506049B41DD846F400AC781F /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		506049B61DD846F400AC781F /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
-		506049B91DD846F400AC781F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
-		506049BB1DD846F400AC781F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		506049BE1DD846F400AC781F /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
-		506049C01DD846F400AC781F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,10 +35,23 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		502845D71DD8BEC10092D6D0 /* UrbandManager */ = {
+			isa = PBXGroup;
+			children = (
+				502845D81DD8BEC10092D6D0 /* AppDelegate.swift */,
+				502845D91DD8BEC10092D6D0 /* Assets.xcassets */,
+				502845DA1DD8BEC10092D6D0 /* LaunchScreen.storyboard */,
+				502845DC1DD8BEC10092D6D0 /* Main.storyboard */,
+				502845DE1DD8BEC10092D6D0 /* Info.plist */,
+				502845DF1DD8BEC10092D6D0 /* ViewController.swift */,
+			);
+			path = UrbandManager;
+			sourceTree = "<group>";
+		};
 		506049A81DD846F400AC781F = {
 			isa = PBXGroup;
 			children = (
-				506049B31DD846F400AC781F /* UrbandManager */,
+				502845D71DD8BEC10092D6D0 /* UrbandManager */,
 				506049B21DD846F400AC781F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -49,20 +62,6 @@
 				506049B11DD846F400AC781F /* UrbandManager.app */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		506049B31DD846F400AC781F /* UrbandManager */ = {
-			isa = PBXGroup;
-			children = (
-				506049B41DD846F400AC781F /* AppDelegate.swift */,
-				506049B61DD846F400AC781F /* ViewController.swift */,
-				506049B81DD846F400AC781F /* Main.storyboard */,
-				506049BB1DD846F400AC781F /* Assets.xcassets */,
-				506049BD1DD846F400AC781F /* LaunchScreen.storyboard */,
-				506049C01DD846F400AC781F /* Info.plist */,
-			);
-			name = UrbandManager;
-			path = UrbandManage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -125,9 +124,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				506049BF1DD846F400AC781F /* LaunchScreen.storyboard in Resources */,
-				506049BC1DD846F400AC781F /* Assets.xcassets in Resources */,
-				506049BA1DD846F400AC781F /* Main.storyboard in Resources */,
+				502845E31DD8BEC10092D6D0 /* Main.storyboard in Resources */,
+				502845E11DD8BEC10092D6D0 /* Assets.xcassets in Resources */,
+				502845E21DD8BEC10092D6D0 /* LaunchScreen.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -138,28 +137,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				506049B71DD846F400AC781F /* ViewController.swift in Sources */,
-				506049B51DD846F400AC781F /* AppDelegate.swift in Sources */,
+				501123431DD8C18E004F5DB9 /* ViewController.swift in Sources */,
+				501123441DD8C190004F5DB9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXVariantGroup section */
-		506049B81DD846F400AC781F /* Main.storyboard */ = {
+		502845DA1DD8BEC10092D6D0 /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
-				506049B91DD846F400AC781F /* Base */,
-			);
-			name = Main.storyboard;
-			sourceTree = "<group>";
-		};
-		506049BD1DD846F400AC781F /* LaunchScreen.storyboard */ = {
-			isa = PBXVariantGroup;
-			children = (
-				506049BE1DD846F400AC781F /* Base */,
+				502845DB1DD8BEC10092D6D0 /* Base */,
 			);
 			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+		502845DC1DD8BEC10092D6D0 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				502845DD1DD8BEC10092D6D0 /* Base */,
+			);
+			name = Main.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -261,10 +260,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FVV346K52C;
-				INFOPLIST_FILE = UrbandManage/Info.plist;
+				INFOPLIST_FILE = UrbandManager/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManage;
+				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -275,10 +274,10 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FVV346K52C;
-				INFOPLIST_FILE = UrbandManage/Info.plist;
+				INFOPLIST_FILE = UrbandManager/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManage;
+				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
