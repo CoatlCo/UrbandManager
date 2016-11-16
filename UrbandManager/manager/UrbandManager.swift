@@ -10,7 +10,7 @@ import Foundation
 import CoreBluetooth
 
 // MARK: - Constants
-struct CBConstants {
+struct UMConstants {
     static let DeviceInfoIdentifier = "180A"
     static let BaterryServiceIdentifier = "180F"
     static let UrbandServiceIdentifier = "FA00"
@@ -18,8 +18,22 @@ struct CBConstants {
     static let SecurityServiceIdentifier = "FC00"
 }
 
+enum UMCentralState {
+    case ready
+    case problem(Error)
+}
+
+enum UMCentralError: Error {
+    case poweredOff
+    case unknown
+    case resetting
+    case unsupported
+    case unauthorized
+}
+
 // MARK: - UrbandManagerDelegate
 protocol UrbandManagerDelegate {
+    func managerState(_ state: UMCentralState)
     func newUrband(_ urband: CBPeripheral)
 }
 
@@ -42,27 +56,28 @@ class UrbandManager: NSObject, CBCentralManagerDelegate {
         centralManager.delegate = self
     }
     
+    // MARK: - External methods
+    
     // MARK: - CBCentralManagerDelegate methods
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        var state: UMCentralState
+        
         switch central.state {
         case .poweredOff:
-            print("poweredOff")
+            state = UMCentralState.problem(UMCentralError.poweredOff)
         case .poweredOn:
-            let services = [CBUUID(string: CBConstants.DeviceInfoIdentifier),
-                            CBUUID(string: CBConstants.BaterryServiceIdentifier),
-                            CBUUID(string: CBConstants.UrbandServiceIdentifier),
-                            CBUUID(string: CBConstants.HapticsServiceIdentifier),
-                            CBUUID(string: CBConstants.SecurityServiceIdentifier)]
-            central.scanForPeripherals(withServices: services, options: nil)
+            state = UMCentralState.ready
         case .unknown:
-            print("unknown")
+            state = UMCentralState.problem(UMCentralError.unknown)
         case .resetting:
-            print("resetting")
+            state = UMCentralState.problem(UMCentralError.resetting)
         case .unsupported:
-            print("unsupported")
+            state = UMCentralState.problem(UMCentralError.unsupported)
         case .unauthorized:
-            print("unauthorized")
+            state = UMCentralState.problem(UMCentralError.unauthorized)
         }
+        
+        delegate?.managerState(state)
     }
     
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {

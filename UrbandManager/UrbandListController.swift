@@ -33,6 +33,18 @@ class UrbandListController: UITableViewController {
 }
 
 extension UrbandListController: UrbandManagerDelegate {
+    func managerState(_ state: UMCentralState) {
+        switch state {
+        case .ready:
+            debugPrint("Listo para parear")
+        default:
+            let alert = UIAlertController(title: "Coatl Co.", message: "Problema con el bluetooth, posiblemente esté apagado", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
+            alert.addAction(ok)
+            present(alert, animated: true, completion: nil)
+        }
+    }
+    
     func newUrband(_ urband: CBPeripheral) {
         urbands.insert(urband, at: 0)
         tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
