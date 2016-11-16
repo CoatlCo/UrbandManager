@@ -12,6 +12,7 @@
 		502845E11DD8BEC10092D6D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 502845D91DD8BEC10092D6D0 /* Assets.xcassets */; };
 		502845E21DD8BEC10092D6D0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 502845DA1DD8BEC10092D6D0 /* LaunchScreen.storyboard */; };
 		502845E31DD8BEC10092D6D0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 502845DC1DD8BEC10092D6D0 /* Main.storyboard */; };
+		50D10F0E1DDA951300C568C2 /* UrbandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50D10F0D1DDA951300C568C2 /* UrbandManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -22,6 +23,7 @@
 		502845DE1DD8BEC10092D6D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		502845DF1DD8BEC10092D6D0 /* UrbandListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrbandListController.swift; sourceTree = "<group>"; };
 		506049B11DD846F400AC781F /* UrbandManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UrbandManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		50D10F0D1DDA951300C568C2 /* UrbandManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrbandManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,12 +40,12 @@
 		502845D71DD8BEC10092D6D0 /* UrbandManager */ = {
 			isa = PBXGroup;
 			children = (
+				50D10F0C1DDA951300C568C2 /* manager */,
 				502845D81DD8BEC10092D6D0 /* AppDelegate.swift */,
+				50DF896E1DDA114A0085031C /* view controllers */,
 				502845D91DD8BEC10092D6D0 /* Assets.xcassets */,
 				502845DA1DD8BEC10092D6D0 /* LaunchScreen.storyboard */,
-				502845DC1DD8BEC10092D6D0 /* Main.storyboard */,
 				502845DE1DD8BEC10092D6D0 /* Info.plist */,
-				502845DF1DD8BEC10092D6D0 /* UrbandListController.swift */,
 			);
 			path = UrbandManager;
 			sourceTree = "<group>";
@@ -62,6 +64,23 @@
 				506049B11DD846F400AC781F /* UrbandManager.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		50D10F0C1DDA951300C568C2 /* manager */ = {
+			isa = PBXGroup;
+			children = (
+				50D10F0D1DDA951300C568C2 /* UrbandManager.swift */,
+			);
+			path = manager;
+			sourceTree = "<group>";
+		};
+		50DF896E1DDA114A0085031C /* view controllers */ = {
+			isa = PBXGroup;
+			children = (
+				502845DC1DD8BEC10092D6D0 /* Main.storyboard */,
+				502845DF1DD8BEC10092D6D0 /* UrbandListController.swift */,
+			);
+			name = "view controllers";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -96,7 +115,7 @@
 				TargetAttributes = {
 					506049B01DD846F400AC781F = {
 						CreatedOnToolsVersion = 8.1;
-						DevelopmentTeam = FVV346K52C;
+						DevelopmentTeam = 4682Q6QAJV;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -138,6 +157,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				501123431DD8C18E004F5DB9 /* UrbandListController.swift in Sources */,
+				50D10F0E1DDA951300C568C2 /* UrbandManager.swift in Sources */,
 				501123441DD8C190004F5DB9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -259,11 +279,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = FVV346K52C;
+				DEVELOPMENT_TEAM = 4682Q6QAJV;
 				INFOPLIST_FILE = UrbandManager/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManager;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dex.enterprise.urband;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
@@ -273,11 +293,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = FVV346K52C;
+				DEVELOPMENT_TEAM = 4682Q6QAJV;
 				INFOPLIST_FILE = UrbandManager/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
-				PRODUCT_BUNDLE_IDENTIFIER = specktro.UrbandManager;
+				PRODUCT_BUNDLE_IDENTIFIER = com.dex.enterprise.urband;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 3.0;
 			};
