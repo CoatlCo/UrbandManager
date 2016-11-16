@@ -36,7 +36,7 @@ extension UrbandListController: UrbandManagerDelegate {
     func managerState(_ state: UMCentralState) {
         switch state {
         case .ready:
-            debugPrint("Listo para parear")
+            UrbandManager.sharedInstance.discover()
         default:
             let alert = UIAlertController(title: "Coatl Co.", message: "Problema con el bluetooth, posiblemente esté apagado", preferredStyle: .alert)
             let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)

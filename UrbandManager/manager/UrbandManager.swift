@@ -57,6 +57,14 @@ class UrbandManager: NSObject, CBCentralManagerDelegate {
     }
     
     // MARK: - External methods
+    func discover() {
+        let services = [CBUUID(string: UMConstants.DeviceInfoIdentifier),
+                        CBUUID(string: UMConstants.BaterryServiceIdentifier),
+                        CBUUID(string: UMConstants.UrbandServiceIdentifier),
+                        CBUUID(string: UMConstants.HapticsServiceIdentifier),
+                        CBUUID(string: UMConstants.SecurityServiceIdentifier)]
+        centralManager.scanForPeripherals(withServices: services, options: nil)
+    }
     
     // MARK: - CBCentralManagerDelegate methods
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
