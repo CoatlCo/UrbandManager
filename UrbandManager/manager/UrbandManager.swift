@@ -106,13 +106,7 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     // MARK: - CBPeripheralDelegate methods
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        let bServices = peripheral.services?.filter {
-            return $0.uuid.uuidString == UMConstants.BaterryServiceIdentifier
-        }
-        
-        if let bService = bServices?.last {
-            peripheral.discoverCharacteristics(nil, for: bService) // We get battery service characteristics
-        }
+        peripheral.characteristicsForService(UMConstants.BaterryServiceIdentifier)
     }
     
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
@@ -132,6 +126,16 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
                 
                 debugPrint(bValue)
             }
+        }
+    }
+}
+
+extension CBPeripheral {
+    fileprivate func characteristicsForService(_ service: String) {
+        let bServices = self.services?.filter { $0.uuid.uuidString == service }
+        
+        if let bService = bServices?.last {
+            self.discoverCharacteristics(nil, for: bService) // We get battery service characteristics
         }
     }
 }
