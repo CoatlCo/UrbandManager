@@ -35,11 +35,13 @@ enum UMCentralError: Error {
 protocol UrbandManagerDelegate {
     func managerState(_ state: UMCentralState)
     func newUrband(_ urband: CBPeripheral)
+    func urbandReady(_ urband: CBPeripheral)
 }
 
 // MARK: - UrbandManager Class
 class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
+    private var services: [String]
     var delegate: UrbandManagerDelegate?
     
     // MARK: Singleton stuff
@@ -47,6 +49,7 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private override init() {
         centralManager = CBCentralManager()
+        services = [UMConstants.DeviceInfoIdentifier, UMConstants.BaterryServiceIdentifier, UMConstants.UrbandServiceIdentifier, UMConstants.HapticsServiceIdentifier, UMConstants.SecurityServiceIdentifier]
         super.init()
         
         start()
@@ -101,31 +104,28 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         peripheral.delegate = self
-        peripheral.discoverServices(nil)
+        
+        if let _ = peripheral.services {
+            delegate?.urbandReady(peripheral)
+        }
+        else {
+            peripheral.discoverServices(nil)
+        }
     }
     
     // MARK: - CBPeripheralDelegate methods
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        peripheral.characteristicsForService(UMConstants.BaterryServiceIdentifier)
-    }
-    
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        if service.uuid.uuidString == UMConstants.BaterryServiceIdentifier {
-            for c in service.characteristics! {
-                peripheral.setNotifyValue(true, for: c)
-            }
+        for s in peripheral.services! {
+            peripheral.characteristicsForService(s.uuid.uuidString)
         }
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        if characteristic.service.uuid.uuidString == UMConstants.BaterryServiceIdentifier {
-            if let bData = characteristic.value {
-                let bValue = bData.withUnsafeBytes({ (ptr: UnsafePointer<Int>) -> Int in
-                    return ptr.pointee
-                })
-                
-                debugPrint(bValue)
-            }
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        let index = services.index(of: service.uuid.uuidString)
+        services.remove(at: index!)
+        
+        if services.count == 0 {
+            delegate?.urbandReady(peripheral)
         }
     }
 }
