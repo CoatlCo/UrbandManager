@@ -30,6 +30,11 @@ class UrbandListController: UITableViewController {
         cell.textLabel?.text = u.name
         return cell
     }
+    
+    // MARK: - UITableViewDelegate methods
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        UrbandManager.sharedInstance.connect(urbands[indexPath.row])
+    }
 }
 
 extension UrbandListController: UrbandManagerDelegate {
