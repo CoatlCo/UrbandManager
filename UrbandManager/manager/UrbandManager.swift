@@ -35,11 +35,13 @@ enum UMCentralError: Error {
 protocol UrbandManagerDelegate {
     func managerState(_ state: UMCentralState)
     func newUrband(_ urband: CBPeripheral)
+    func urbandReady(_ urband: CBPeripheral)
 }
 
 // MARK: - UrbandManager Class
-class UrbandManager: NSObject, CBCentralManagerDelegate {
+class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
+    private var services: [String]
     var delegate: UrbandManagerDelegate?
     
     // MARK: Singleton stuff
@@ -47,6 +49,7 @@ class UrbandManager: NSObject, CBCentralManagerDelegate {
     
     private override init() {
         centralManager = CBCentralManager()
+        services = [UMConstants.DeviceInfoIdentifier, UMConstants.BaterryServiceIdentifier, UMConstants.UrbandServiceIdentifier, UMConstants.HapticsServiceIdentifier, UMConstants.SecurityServiceIdentifier]
         super.init()
         
         start()
@@ -64,6 +67,10 @@ class UrbandManager: NSObject, CBCentralManagerDelegate {
                         CBUUID(string: UMConstants.HapticsServiceIdentifier),
                         CBUUID(string: UMConstants.SecurityServiceIdentifier)]
         centralManager.scanForPeripherals(withServices: services, options: nil)
+    }
+    
+    func connect(_ urband: CBPeripheral) {
+        centralManager.connect(urband, options: nil)
     }
     
     // MARK: - CBCentralManagerDelegate methods
@@ -92,6 +99,43 @@ class UrbandManager: NSObject, CBCentralManagerDelegate {
         if let _ = advertisementData[CBAdvertisementDataLocalNameKey] {
             debugPrint(peripheral.identifier.uuidString)
             delegate?.newUrband(peripheral)
+        }
+    }
+    
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        peripheral.delegate = self
+        
+        if let _ = peripheral.services {
+            delegate?.urbandReady(peripheral)
+        }
+        else {
+            peripheral.discoverServices(nil)
+        }
+    }
+    
+    // MARK: - CBPeripheralDelegate methods
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        for s in peripheral.services! {
+            peripheral.characteristicsForService(s.uuid.uuidString)
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        let index = services.index(of: service.uuid.uuidString)
+        services.remove(at: index!)
+        
+        if services.count == 0 {
+            delegate?.urbandReady(peripheral)
+        }
+    }
+}
+
+extension CBPeripheral {
+    fileprivate func characteristicsForService(_ service: String) {
+        let bServices = self.services?.filter { $0.uuid.uuidString == service }
+        
+        if let bService = bServices?.last {
+            self.discoverCharacteristics(nil, for: bService) // We get battery service characteristics
         }
     }
 }

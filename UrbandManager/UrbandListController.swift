@@ -27,8 +27,13 @@ class UrbandListController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "urbandCellIdentifier", for: indexPath)
         let u = urbands[indexPath.row]
-        cell.textLabel?.text = u.name
+        cell.textLabel?.text = u.identifier.uuidString
         return cell
+    }
+    
+    // MARK: - UITableViewDelegate methods
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        UrbandManager.sharedInstance.connect(urbands[indexPath.row])
     }
 }
 
@@ -48,5 +53,9 @@ extension UrbandListController: UrbandManagerDelegate {
     func newUrband(_ urband: CBPeripheral) {
         urbands.insert(urband, at: 0)
         tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
+    }
+    
+    func urbandReady(_ urband: CBPeripheral) {
+        debugPrint("My urband is ready > \(urband.identifier.uuidString)")
     }
 }
