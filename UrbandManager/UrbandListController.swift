@@ -57,5 +57,6 @@ extension UrbandListController: UrbandManagerDelegate {
     
     func urbandReady(_ urband: CBPeripheral) {
         UrbandManager.sharedInstance.readFA01(urband: urband)
+        UrbandManager.sharedInstance.writeFC02(urband: urband)
     }
 }

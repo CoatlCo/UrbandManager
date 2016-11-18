@@ -82,6 +82,11 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         urband.readValue(for: fa01)
     }
     
+    func writeFC02(urband: CBPeripheral) {
+        let fc02 = urband.services![3].characteristics![1]
+        urband.writeValue(Data(bytes: [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]), for: fc02, type: .withResponse)
+    }
+    
     // MARK: - CBCentralManagerDelegate methods
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         var state: UMCentralState
