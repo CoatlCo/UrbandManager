@@ -56,6 +56,7 @@ extension UrbandListController: UrbandManagerDelegate {
     }
     
     func urbandReady(_ urband: CBPeripheral) {
-        debugPrint("My urband is ready > \(urband.identifier.uuidString)")
+        UrbandManager.sharedInstance.readFA01(urband: urband)
+        UrbandManager.sharedInstance.writeFC02(urband: urband)
     }
 }
