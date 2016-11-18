@@ -49,7 +49,11 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     private override init() {
         centralManager = CBCentralManager()
-        services = [UMConstants.DeviceInfoIdentifier, UMConstants.BaterryServiceIdentifier, UMConstants.UrbandServiceIdentifier, UMConstants.HapticsServiceIdentifier, UMConstants.SecurityServiceIdentifier]
+        services = [UMConstants.DeviceInfoIdentifier,
+                    UMConstants.BaterryServiceIdentifier,
+                    UMConstants.UrbandServiceIdentifier,
+                    UMConstants.HapticsServiceIdentifier,
+                    UMConstants.SecurityServiceIdentifier]
         super.init()
         
         start()
@@ -71,6 +75,11 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     
     func connect(_ urband: CBPeripheral) {
         centralManager.connect(urband, options: nil)
+    }
+    
+    func readFA01(urband: CBPeripheral) {
+        let fa01 = urband.services![1].characteristics![0]
+        urband.readValue(for: fa01)
     }
     
     // MARK: - CBCentralManagerDelegate methods
@@ -128,6 +137,10 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
             delegate?.urbandReady(peripheral)
         }
     }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        debugPrint(characteristic.value?.hexEncodedString() ?? "I can't read characteristic")
+    }
 }
 
 extension CBPeripheral {
@@ -137,5 +150,11 @@ extension CBPeripheral {
         if let bService = bServices?.last {
             self.discoverCharacteristics(nil, for: bService) // We get battery service characteristics
         }
+    }
+}
+
+extension Data {
+    func hexEncodedString() -> String {
+        return map { String(format: "%02hhx", $0) }.joined()
     }
 }
