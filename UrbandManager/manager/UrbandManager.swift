@@ -31,7 +31,7 @@ enum UMCentralError: Error {
     case unauthorized
 }
 
-// MARK: - UrbandManagerDelegate
+// MARK: - UrbandManagerDelegate protocol
 protocol UrbandManagerDelegate {
     func managerState(_ state: UMCentralState)
     func newUrband(_ urband: CBPeripheral)
@@ -148,12 +148,13 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
 }
 
+// MARK: - CBPeripheral methods
 extension CBPeripheral {
     fileprivate func characteristicsForService(_ service: String) {
         let bServices = self.services?.filter { $0.uuid.uuidString == service }
         
         if let bService = bServices?.last {
-            self.discoverCharacteristics(nil, for: bService) // We get battery service characteristics
+            self.discoverCharacteristics(nil, for: bService)
         }
     }
 }
