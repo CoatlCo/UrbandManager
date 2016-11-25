@@ -15,5 +15,5 @@ Pod::Spec.new do |s|
   	s.source           		= { :git => 'https://github.com/CoatlCo/UrbandManager.git', :tag => "#{s.version}" }
  	
  	s.framework 			= "CoreBluetooth"
-  	s.source_files 			= 'UrbandManager/manager/UrbandManager.swift'
+  	s.source_files 			= 'UrbandManager/**/*.swift'
 end
