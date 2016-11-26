@@ -10,7 +10,7 @@ import Foundation
 import CoreBluetooth
 
 // MARK: - Constants
-struct UMConstants {
+public struct UMConstants {
     static let DeviceInfoIdentifier = "180A"
     static let BaterryServiceIdentifier = "180F"
     static let UrbandServiceIdentifier = "FA00"
@@ -18,12 +18,12 @@ struct UMConstants {
     static let SecurityServiceIdentifier = "FC00"
 }
 
-enum UMCentralState {
+public enum UMCentralState {
     case ready
     case problem(Error)
 }
 
-enum UMCentralError: Error {
+public enum UMCentralError: Error {
     case poweredOff
     case unknown
     case resetting
@@ -32,20 +32,20 @@ enum UMCentralError: Error {
 }
 
 // MARK: - UrbandManagerDelegate protocol
-protocol UrbandManagerDelegate {
+public protocol UrbandManagerDelegate {
     func managerState(_ state: UMCentralState)
     func newUrband(_ urband: CBPeripheral)
     func urbandReady(_ urband: CBPeripheral)
 }
 
 // MARK: - UrbandManager Class
-class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
+public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
     private var services: [String]
-    var delegate: UrbandManagerDelegate?
+    public var delegate: UrbandManagerDelegate?
     
     // MARK: Singleton stuff
-    static let sharedInstance = UrbandManager()
+    static public let sharedInstance = UrbandManager()
     
     private override init() {
         centralManager = CBCentralManager()
@@ -64,7 +64,7 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     // MARK: - External methods
-    func discover() {
+    public func discover() {
         let services = [CBUUID(string: UMConstants.DeviceInfoIdentifier),
                         CBUUID(string: UMConstants.BaterryServiceIdentifier),
                         CBUUID(string: UMConstants.UrbandServiceIdentifier),
@@ -73,22 +73,22 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         centralManager.scanForPeripherals(withServices: services, options: nil)
     }
     
-    func connect(_ urband: CBPeripheral) {
+    public func connect(_ urband: CBPeripheral) {
         centralManager.connect(urband, options: nil)
     }
     
-    func readFA01(urband: CBPeripheral) {
+    public func readFA01(urband: CBPeripheral) {
         let fa01 = urband.services![1].characteristics![0]
         urband.readValue(for: fa01)
     }
     
-    func writeFC02(urband: CBPeripheral) {
+    public func writeFC02(urband: CBPeripheral) {
         let fc02 = urband.services![3].characteristics![1]
         urband.writeValue(Data(bytes: [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]), for: fc02, type: .withResponse)
     }
     
     // MARK: - CBCentralManagerDelegate methods
-    func centralManagerDidUpdateState(_ central: CBCentralManager) {
+    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
         var state: UMCentralState
         
         switch central.state {
@@ -109,14 +109,14 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         delegate?.managerState(state)
     }
     
-    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+    public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         if let _ = advertisementData[CBAdvertisementDataLocalNameKey] {
             debugPrint(peripheral.identifier.uuidString)
             delegate?.newUrband(peripheral)
         }
     }
     
-    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+    public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         peripheral.delegate = self
         
         if let _ = peripheral.services {
@@ -128,13 +128,13 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     }
     
     // MARK: - CBPeripheralDelegate methods
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         for s in peripheral.services! {
             peripheral.characteristicsForService(s.uuid.uuidString)
         }
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
         let index = services.index(of: service.uuid.uuidString)
         services.remove(at: index!)
         
@@ -143,7 +143,7 @@ class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
         }
     }
     
-    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+    public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         debugPrint(characteristic.value?.hexEncodedString() ?? "I can't read characteristic")
     }
 }

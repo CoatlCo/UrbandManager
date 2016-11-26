@@ -12,7 +12,7 @@
 		502845E11DD8BEC10092D6D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 502845D91DD8BEC10092D6D0 /* Assets.xcassets */; };
 		502845E21DD8BEC10092D6D0 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 502845DA1DD8BEC10092D6D0 /* LaunchScreen.storyboard */; };
 		502845E31DD8BEC10092D6D0 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 502845DC1DD8BEC10092D6D0 /* Main.storyboard */; };
-		505C614B1DDFBAE400D5FA2B /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 505C614A1DDFBAE400D5FA2B /* Utilities.swift */; };
+		507670AE1DE7DBD300D7209D /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = 507670AD1DE7DBD300D7209D /* Utilities.swift */; };
 		50D10F0E1DDA951300C568C2 /* UrbandManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50D10F0D1DDA951300C568C2 /* UrbandManager.swift */; };
 /* End PBXBuildFile section */
 
@@ -23,8 +23,8 @@
 		502845DD1DD8BEC10092D6D0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		502845DE1DD8BEC10092D6D0 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		502845DF1DD8BEC10092D6D0 /* UrbandListController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrbandListController.swift; sourceTree = "<group>"; };
-		505C614A1DDFBAE400D5FA2B /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		506049B11DD846F400AC781F /* UrbandManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UrbandManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		507670AD1DE7DBD300D7209D /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Utilities.swift; path = utilities/Utilities.swift; sourceTree = "<group>"; };
 		50D10F0D1DDA951300C568C2 /* UrbandManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrbandManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -56,7 +56,7 @@
 		505C61491DDFBA4D00D5FA2B /* utilities */ = {
 			isa = PBXGroup;
 			children = (
-				505C614A1DDFBAE400D5FA2B /* Utilities.swift */,
+				507670AD1DE7DBD300D7209D /* Utilities.swift */,
 			);
 			name = utilities;
 			sourceTree = "<group>";
@@ -88,8 +88,8 @@
 		50DF896E1DDA114A0085031C /* view controllers */ = {
 			isa = PBXGroup;
 			children = (
-				502845DC1DD8BEC10092D6D0 /* Main.storyboard */,
 				502845DF1DD8BEC10092D6D0 /* UrbandListController.swift */,
+				502845DC1DD8BEC10092D6D0 /* Main.storyboard */,
 			);
 			name = "view controllers";
 			sourceTree = "<group>";
@@ -169,7 +169,7 @@
 			files = (
 				501123431DD8C18E004F5DB9 /* UrbandListController.swift in Sources */,
 				50D10F0E1DDA951300C568C2 /* UrbandManager.swift in Sources */,
-				505C614B1DDFBAE400D5FA2B /* Utilities.swift in Sources */,
+				507670AE1DE7DBD300D7209D /* Utilities.swift in Sources */,
 				501123441DD8C190004F5DB9 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
