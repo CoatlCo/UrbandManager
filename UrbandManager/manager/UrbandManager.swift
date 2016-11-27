@@ -82,6 +82,12 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         urband.readValue(for: fa01)
     }
     
+    public func notifyFA09(urband: CBPeripheral) {
+        let fa09 = urband.services![1].characteristics![8]
+//        let fa01 = urband.services![1].characteristics![0]
+        urband.setNotifyValue(true, for: fa09)
+    }
+    
     public func writeFC02(urband: CBPeripheral) {
         let fc02 = urband.services![3].characteristics![1]
         urband.writeValue(Data(bytes: [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]), for: fc02, type: .withResponse)
@@ -143,8 +149,66 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
+    private func convert(_ param2: UInt8, _ param1: UInt8) -> Int {
+        let signMask: UInt16 = 0b1000000000000000
+        let xorMask: UInt16 = 0b1111111111111111
+        
+        var number: Int
+        let high = UInt16(exactly: param2)! << 8
+        let low = UInt16(exactly: param1)!
+        let number1 = high | low
+        let mask = number1 & signMask // validación de positivo o negativo
+        
+        if mask == signMask { // negativo
+            let result = (number1 ^ xorMask) + UInt16(1)
+            number = -1 * Int(exactly: result)!
+        }
+        else {
+            number = Int(exactly: number1)!
+        }
+        
+        return number
+    }
+    
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        debugPrint(characteristic.value?.hexEncodedString() ?? "I can't read characteristic")
+        
+        
+        if let data = characteristic.value {
+            let array = data.withUnsafeBytes {
+                Array(UnsafeBufferPointer<UInt8>(start: $0, count: data.count / MemoryLayout<UInt8>.size))
+            }
+            
+            if array.last == 2 {
+                let xArray = Array<UInt8>(array[44..<88])
+                let xValues = [convert(xArray[0], xArray[1]),
+                               convert(xArray[2], xArray[3]),
+                               convert(xArray[4], xArray[5]),
+                               convert(xArray[6], xArray[7]),
+                               convert(xArray[8], xArray[9]),
+                               convert(xArray[10], xArray[11]),
+                               convert(xArray[12], xArray[13]),
+                               convert(xArray[14], xArray[15]),
+                               convert(xArray[16], xArray[17]),
+                               convert(xArray[18], xArray[19]),
+                               convert(xArray[20], xArray[21]),
+                               convert(xArray[22], xArray[23]),
+                               convert(xArray[24], xArray[25]),
+                               convert(xArray[26], xArray[27]),
+                               convert(xArray[28], xArray[29]),
+                               convert(xArray[30], xArray[31]),
+                               convert(xArray[32], xArray[33]),
+                               convert(xArray[34], xArray[35]),
+                               convert(xArray[36], xArray[37]),
+                               convert(xArray[38], xArray[39]),
+                               convert(xArray[40], xArray[41]),
+                               convert(xArray[42], xArray[43])]
+                let average = xValues.reduce(0) {
+                    return $0 + $1 / array.count
+                }
+                
+                print(average)
+            }
+        }
     }
 }
 

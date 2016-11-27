@@ -26,6 +26,7 @@ class UrbandListController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "urbandCellIdentifier", for: indexPath)
+        cell.textLabel?.font = UIFont.systemFont(ofSize: 12)
         let u = urbands[indexPath.row]
         cell.textLabel?.text = u.identifier.uuidString
         return cell
@@ -56,7 +57,6 @@ extension UrbandListController: UrbandManagerDelegate {
     }
     
     func urbandReady(_ urband: CBPeripheral) {
-        UrbandManager.sharedInstance.readFA01(urband: urband)
-        UrbandManager.sharedInstance.writeFC02(urband: urband)
+        UrbandManager.sharedInstance.notifyFA09(urband: urband)
     }
 }
