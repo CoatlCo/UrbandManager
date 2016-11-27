@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2E926DA77D1631D3CE8598CC /* Pods_UrbandManager.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 50EE296E25619608FD25A522 /* Pods_UrbandManager.framework */; };
 		501123431DD8C18E004F5DB9 /* UrbandListController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502845DF1DD8BEC10092D6D0 /* UrbandListController.swift */; };
 		501123441DD8C190004F5DB9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 502845D81DD8BEC10092D6D0 /* AppDelegate.swift */; };
 		502845E11DD8BEC10092D6D0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 502845D91DD8BEC10092D6D0 /* Assets.xcassets */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		44EA310C8CEE145E026505DC /* Pods-UrbandManager.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UrbandManager.debug.xcconfig"; path = "Pods/Target Support Files/Pods-UrbandManager/Pods-UrbandManager.debug.xcconfig"; sourceTree = "<group>"; };
 		502845D81DD8BEC10092D6D0 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		502845D91DD8BEC10092D6D0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		502845DB1DD8BEC10092D6D0 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -26,6 +28,8 @@
 		506049B11DD846F400AC781F /* UrbandManager.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UrbandManager.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		507670AD1DE7DBD300D7209D /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = Utilities.swift; path = utilities/Utilities.swift; sourceTree = "<group>"; };
 		50D10F0D1DDA951300C568C2 /* UrbandManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UrbandManager.swift; sourceTree = "<group>"; };
+		50EE296E25619608FD25A522 /* Pods_UrbandManager.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UrbandManager.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		7F477F732F41EAE5CE0B400B /* Pods-UrbandManager.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UrbandManager.release.xcconfig"; path = "Pods/Target Support Files/Pods-UrbandManager/Pods-UrbandManager.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -33,12 +37,22 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2E926DA77D1631D3CE8598CC /* Pods_UrbandManager.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		00FCFE919B20D62E8E148A9F /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				44EA310C8CEE145E026505DC /* Pods-UrbandManager.debug.xcconfig */,
+				7F477F732F41EAE5CE0B400B /* Pods-UrbandManager.release.xcconfig */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
 		502845D71DD8BEC10092D6D0 /* UrbandManager */ = {
 			isa = PBXGroup;
 			children = (
@@ -66,6 +80,8 @@
 			children = (
 				502845D71DD8BEC10092D6D0 /* UrbandManager */,
 				506049B21DD846F400AC781F /* Products */,
+				00FCFE919B20D62E8E148A9F /* Pods */,
+				85488841DC7EFE9586B3AC98 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -94,6 +110,14 @@
 			name = "view controllers";
 			sourceTree = "<group>";
 		};
+		85488841DC7EFE9586B3AC98 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				50EE296E25619608FD25A522 /* Pods_UrbandManager.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -101,9 +125,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 506049C31DD846F400AC781F /* Build configuration list for PBXNativeTarget "UrbandManager" */;
 			buildPhases = (
+				7BC54328FDD37654F29B0DE6 /* [CP] Check Pods Manifest.lock */,
 				506049AD1DD846F400AC781F /* Sources */,
 				506049AE1DD846F400AC781F /* Frameworks */,
 				506049AF1DD846F400AC781F /* Resources */,
+				8351FE4B3868A8B012552242 /* [CP] Embed Pods Frameworks */,
+				E2D005A7CED13D2F8D0793C8 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -161,6 +188,54 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		7BC54328FDD37654F29B0DE6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8351FE4B3868A8B012552242 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UrbandManager/Pods-UrbandManager-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		E2D005A7CED13D2F8D0793C8 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-UrbandManager/Pods-UrbandManager-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		506049AD1DD846F400AC781F /* Sources */ = {
@@ -289,6 +364,7 @@
 		};
 		506049C41DD846F400AC781F /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EA310C8CEE145E026505DC /* Pods-UrbandManager.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 4682Q6QAJV;
@@ -303,6 +379,7 @@
 		};
 		506049C51DD846F400AC781F /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 7F477F732F41EAE5CE0B400B /* Pods-UrbandManager.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = 4682Q6QAJV;
