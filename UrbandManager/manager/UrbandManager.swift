@@ -179,47 +179,8 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 Array(UnsafeBufferPointer<UInt8>(start: $0, count: data.count / MemoryLayout<UInt8>.size))
             }
             
-//            if array.last == 2 { // Lectura del eje x del giroscopio
-//                let xArray = Array<UInt8>(array[44..<88])
-//                let xValues = [convert(xArray[0], xArray[1]),
-//                               convert(xArray[2], xArray[3]),
-//                               convert(xArray[4], xArray[5]),
-//                               convert(xArray[6], xArray[7]),
-//                               convert(xArray[8], xArray[9]),
-//                               convert(xArray[10], xArray[11]),
-//                               convert(xArray[12], xArray[13]),
-//                               convert(xArray[14], xArray[15]),
-//                               convert(xArray[16], xArray[17]),
-//                               convert(xArray[18], xArray[19]),
-//                               convert(xArray[20], xArray[21]),
-//                               convert(xArray[22], xArray[23]),
-//                               convert(xArray[24], xArray[25]),
-//                               convert(xArray[26], xArray[27]),
-//                               convert(xArray[28], xArray[29]),
-//                               convert(xArray[30], xArray[31]),
-//                               convert(xArray[32], xArray[33]),
-//                               convert(xArray[34], xArray[35]),
-//                               convert(xArray[36], xArray[37]),
-//                               convert(xArray[38], xArray[39]),
-//                               convert(xArray[40], xArray[41]),
-//                               convert(xArray[42], xArray[43])]
-//                var average = xValues.reduce(0) {
-//                    return $0 + $1 / array.count
-//                }
-//                
-//                let direction = average >= 0 ? 90 : 270
-//                if average < 0 {
-//                    average *= -1
-//                }
-//                average = average * 25 / 100
-//                
-//                print("average \(average) - direction \(direction)")
-//                
-//                let _ = Alamofire.request("http://50.50.50.49:8000/bb8/v1/run/?m=\(average)&d=\(direction)")
-//            }
-            
-            if array.last == 3 { // Lectura del eje x del giroscopio
-                let xArray = Array<UInt8>(array[0..<44])
+            if array.last == 2 { // Lectura del eje x del giroscopio
+                let xArray = Array<UInt8>(array[44..<88])
                 let xValues = [convert(xArray[0], xArray[1]),
                                convert(xArray[2], xArray[3]),
                                convert(xArray[4], xArray[5]),
