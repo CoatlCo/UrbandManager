@@ -82,9 +82,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         urband.readValue(for: fa01)
     }
     
-    public func writeFC02(urband: CBPeripheral) {
-        let fc02 = urband.services![3].characteristics![1]
-        urband.writeValue(Data(bytes: [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]), for: fc02, type: .withResponse)
+    public func login(urband u: CBPeripheral, withToken token: [UInt8]) {
+        let fc02 = u.services![3].characteristics![1]
+        u.writeValue(Data(bytes: token), for: fc02, type: .withResponse)
     }
     
     // MARK: - CBCentralManagerDelegate methods
