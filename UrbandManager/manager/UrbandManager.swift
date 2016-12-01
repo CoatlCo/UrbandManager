@@ -101,7 +101,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         u.writeValue(Data(bytes: token), for: fc02, type: .withResponse)
     }
     
-    func activateGestures(_ urband: CBPeripheral) {
+    public func activateGestures(_ urband: CBPeripheral) {
         let fa01 = urband.services![1].characteristics![0]
         urband.writeValue(Data(bytes: [0x00]), for: fa01, type: .withResponse)
     }
