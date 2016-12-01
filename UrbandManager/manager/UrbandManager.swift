@@ -31,6 +31,11 @@ public enum UMCentralError: Error {
     case unauthorized
 }
 
+public enum UMGestureResponse {
+    case success
+    case failure
+}
+
 // MARK: - UrbandManagerDelegate protocol
 public protocol UrbandManagerDelegate {
     func managerState(_ state: UMCentralState)
@@ -42,6 +47,7 @@ public protocol UrbandManagerDelegate {
 public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
     private var services: [String]
+    private var confirmClosure: ((UMGestureResponse) -> Void)?
     public var delegate: UrbandManagerDelegate?
     
     // MARK: Singleton stuff
@@ -77,14 +83,21 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.connect(urband, options: nil)
     }
     
-    public func readFA01(urband: CBPeripheral) {
+    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
         let fa01 = urband.services![1].characteristics![0]
         urband.readValue(for: fa01)
+        confirmClosure = response
     }
     
     public func login(urband u: CBPeripheral, withToken token: [UInt8]) {
         let fc02 = u.services![3].characteristics![1]
         u.writeValue(Data(bytes: token), for: fc02, type: .withResponse)
+    }
+    
+    public func confirmGesture(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
+        let fa01 = urband.services![1].characteristics![0]
+        urband.setNotifyValue(true, for: fa01)
+        confirmClosure = response
     }
     
     // MARK: - CBCentralManagerDelegate methods
@@ -144,7 +157,44 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        debugPrint(characteristic.value?.hexEncodedString() ?? "I can't read characteristic")
+        guard let data = characteristic.value else {
+            debugPrint("There is not a value in the characteristic")
+            return
+        }
+        
+        let dataArray = data.withUnsafeBytes {
+            Array(UnsafeBufferPointer<UInt8>(start: $0, count: data.count / MemoryLayout<UInt8>.size))
+        }
+        
+        debugPrint(dataArray)
+        
+        if let closure = confirmClosure {
+            guard let value = dataArray.first else {
+                closure(.failure)
+                confirmClosure = nil
+                return
+            }
+            
+            if characteristic.uuid.uuidString == "FA01" {
+                switch value {
+                case 0x11:
+                    debugPrint("The urband is ready and without problems")
+                    closure(UMGestureResponse.success)
+                    confirmClosure = nil
+                case 0x16:
+                    debugPrint("The urband confirm gesture was detected")
+                    closure(UMGestureResponse.success)
+                    confirmClosure = nil
+                default:
+                    debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
+                }
+            }
+        }
+//        else {
+//            guard let value = dataArray.first else {
+//                return
+//            }
+//        }
     }
 }
 

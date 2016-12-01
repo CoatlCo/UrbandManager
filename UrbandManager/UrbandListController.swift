@@ -56,8 +56,15 @@ extension UrbandListController: UrbandManagerDelegate {
     }
     
     func urbandReady(_ urband: CBPeripheral) {
-        UrbandManager.sharedInstance.readFA01(urband: urband)
-        let binaryToken: [UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
-        UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
+        UrbandManager.sharedInstance.readFA01(urband) { result in
+            switch result {
+                case .success:
+                      debugPrint("The urband is working")
+                    let binaryToken: [UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+                    UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
+                case .failure:
+                    debugPrint("The urband is not working correctly")
+            }
+        }
     }
 }
