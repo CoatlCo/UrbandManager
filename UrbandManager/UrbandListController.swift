@@ -56,8 +56,30 @@ extension UrbandListController: UrbandManagerDelegate {
     }
     
     func urbandReady(_ urband: CBPeripheral) {
-        UrbandManager.sharedInstance.readFA01(urband: urband)
-        let binaryToken: [UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
-        UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
+        UrbandManager.sharedInstance.readFA01(urband) { result in
+            switch result {
+                case .success:
+                    debugPrint("The urband is working")
+                    let binaryToken: [UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+                    UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
+                
+                    delay(seconds: 3.0) {
+                        UrbandManager.sharedInstance.activateGestures(urband)
+                        
+                        delay(seconds: 2.0) {
+                            UrbandManager.sharedInstance.confirmGesture(urband) { res in
+                                switch res {
+                                case .success:
+                                    debugPrint("Confirm gesture was detected")
+                                case .failure:
+                                    debugPrint("Error while detecting gesture")
+                                }
+                            }
+                        }
+                    }
+                case .failure:
+                    debugPrint("The urband is not working correctly")
+            }
+        }
     }
 }
