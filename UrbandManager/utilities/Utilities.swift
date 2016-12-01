@@ -14,3 +14,9 @@ extension Data {
         return map { String(format: "%02hhx", $0) }.joined()
     }
 }
+
+
+// MARK: - Generic functions
+func delay(seconds s: Double, completion: @escaping (Void) -> Void) {
+    DispatchQueue.main.asyncAfter(deadline: .now() + s, execute: completion)
+}

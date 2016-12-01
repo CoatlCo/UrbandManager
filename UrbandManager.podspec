@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 	# 1
   s.name = 'UrbandManager'
-  s.version = '0.0.1'
+  s.version = '0.0.2'
   s.ios.deployment_target = '10.0'
   s.summary = 'By far the most fantastic urband manager I have seen in my entire life. No joke.'
  
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   DESC
  
  	s.homepage = 'https://github.com/CoatlCo/UrbandManager'
-  s.license = { :type => 'MIT', :file => 'LICENSE' }
+  s.license = { :type => 'MIT', :file => 'LICENSE.md' }
   s.author = { 'specktro' => 'specktro@nonull.mx' }
   s.source = { :git => 'https://github.com/CoatlCo/UrbandManager.git', :tag => "#{s.version}" }
  	

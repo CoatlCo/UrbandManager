@@ -10,12 +10,19 @@ import Foundation
 import CoreBluetooth
 
 // MARK: - Constants
-public struct UMConstants {
+struct UMServices {
     static let DeviceInfoIdentifier = "180A"
     static let BaterryServiceIdentifier = "180F"
     static let UrbandServiceIdentifier = "FA00"
     static let HapticsServiceIdentifier = "FB00"
     static let SecurityServiceIdentifier = "FC00"
+}
+
+struct UMCharacteristics {
+    static let UrbandReady: UInt8 = 0x11
+    static let CompoundGesture: UInt8 = 0x14
+    static let DoubleTapGesture: UInt8 = 0x15
+    static let ConfirmGesture: UInt8 = 0x16
 }
 
 public enum UMCentralState {
@@ -31,6 +38,11 @@ public enum UMCentralError: Error {
     case unauthorized
 }
 
+public enum UMGestureResponse {
+    case success
+    case failure
+}
+
 // MARK: - UrbandManagerDelegate protocol
 public protocol UrbandManagerDelegate {
     func managerState(_ state: UMCentralState)
@@ -42,6 +54,7 @@ public protocol UrbandManagerDelegate {
 public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
     private var services: [String]
+    private var confirmClosure: ((UMGestureResponse) -> Void)?
     public var delegate: UrbandManagerDelegate?
     
     // MARK: Singleton stuff
@@ -49,11 +62,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     
     private override init() {
         centralManager = CBCentralManager()
-        services = [UMConstants.DeviceInfoIdentifier,
-                    UMConstants.BaterryServiceIdentifier,
-                    UMConstants.UrbandServiceIdentifier,
-                    UMConstants.HapticsServiceIdentifier,
-                    UMConstants.SecurityServiceIdentifier]
+        services = [UMServices.DeviceInfoIdentifier,
+                    UMServices.BaterryServiceIdentifier,
+                    UMServices.UrbandServiceIdentifier,
+                    UMServices.HapticsServiceIdentifier,
+                    UMServices.SecurityServiceIdentifier]
         super.init()
         
         start()
@@ -65,11 +78,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     
     // MARK: - External methods
     public func discover() {
-        let services = [CBUUID(string: UMConstants.DeviceInfoIdentifier),
-                        CBUUID(string: UMConstants.BaterryServiceIdentifier),
-                        CBUUID(string: UMConstants.UrbandServiceIdentifier),
-                        CBUUID(string: UMConstants.HapticsServiceIdentifier),
-                        CBUUID(string: UMConstants.SecurityServiceIdentifier)]
+        let services = [CBUUID(string: UMServices.DeviceInfoIdentifier),
+                        CBUUID(string: UMServices.BaterryServiceIdentifier),
+                        CBUUID(string: UMServices.UrbandServiceIdentifier),
+                        CBUUID(string: UMServices.HapticsServiceIdentifier),
+                        CBUUID(string: UMServices.SecurityServiceIdentifier)]
         centralManager.scanForPeripherals(withServices: services, options: nil)
     }
     
@@ -77,14 +90,26 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.connect(urband, options: nil)
     }
     
-    public func readFA01(urband: CBPeripheral) {
+    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
         let fa01 = urband.services![1].characteristics![0]
         urband.readValue(for: fa01)
+        confirmClosure = response
     }
     
-    public func writeFC02(urband: CBPeripheral) {
-        let fc02 = urband.services![3].characteristics![1]
-        urband.writeValue(Data(bytes: [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]), for: fc02, type: .withResponse)
+    public func login(urband u: CBPeripheral, withToken token: [UInt8]) {
+        let fc02 = u.services![3].characteristics![1]
+        u.writeValue(Data(bytes: token), for: fc02, type: .withResponse)
+    }
+    
+    func activateGestures(_ urband: CBPeripheral) {
+        let fa01 = urband.services![1].characteristics![0]
+        urband.writeValue(Data(bytes: [0x00]), for: fa01, type: .withResponse)
+    }
+    
+    public func confirmGesture(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
+        let fa01 = urband.services![1].characteristics![0]
+        urband.setNotifyValue(true, for: fa01)
+        confirmClosure = response
     }
     
     // MARK: - CBCentralManagerDelegate methods
@@ -144,7 +169,37 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
-        debugPrint(characteristic.value?.hexEncodedString() ?? "I can't read characteristic")
+        guard let data = characteristic.value else {
+            debugPrint("There is not a value in the characteristic")
+            return
+        }
+        
+        let dataArray = data.withUnsafeBytes {
+            Array(UnsafeBufferPointer<UInt8>(start: $0, count: data.count / MemoryLayout<UInt8>.size))
+        }
+        
+        if let closure = confirmClosure {
+            guard let value = dataArray.first else {
+                closure(.failure)
+                confirmClosure = nil
+                return
+            }
+            
+            if characteristic.uuid.uuidString == "FA01" {
+                switch value {
+                case UMCharacteristics.UrbandReady:
+                    debugPrint("The urband is ready and without problems")
+                    closure(UMGestureResponse.success)
+                    confirmClosure = nil
+                case UMCharacteristics.ConfirmGesture:
+                    debugPrint("The urband confirm gesture was detected")
+                    closure(UMGestureResponse.success)
+                    confirmClosure = nil
+                default:
+                    debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
+                }
+            }
+        }
     }
 }
 
