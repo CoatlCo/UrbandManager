@@ -44,7 +44,7 @@ public enum UMGestureResponse {
 }
 
 // MARK: - UrbandManagerDelegate protocol
-public protocol UrbandManagerDelegate {
+public protocol UrbandManagerDelegate: class {
     func managerState(_ state: UMCentralState)
     func newUrband(_ urband: CBPeripheral)
     func urbandReady(_ urband: CBPeripheral)
@@ -55,7 +55,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var centralManager: CBCentralManager
     private var services: [String]
     private var confirmClosure: ((UMGestureResponse) -> Void)?
-    public var delegate: UrbandManagerDelegate?
+    public weak var delegate: UrbandManagerDelegate?
     
     // MARK: Singleton stuff
     static public let sharedInstance = UrbandManager()
