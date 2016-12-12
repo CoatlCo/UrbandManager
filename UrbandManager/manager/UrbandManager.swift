@@ -10,6 +10,8 @@ import Foundation
 import CoreBluetooth
 
 // MARK: - Constants
+let lastConnectedUrband = "last_connected_uuid"
+
 struct UMServices {
     static let DeviceInfoIdentifier = "180A"
     static let BaterryServiceIdentifier = "180F"
@@ -56,6 +58,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var services: [String]
     private var confirmClosure: ((UMGestureResponse) -> Void)?
     public weak var delegate: UrbandManagerDelegate?
+    private(set) var connectedUrband: CBPeripheral?
     
     // MARK: Singleton stuff
     static public let sharedInstance = UrbandManager()
@@ -73,6 +76,15 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     private func start() {
+        // We get the last connected urband device in the connectedUrband variable
+        if let uuidString = UserDefaults.standard.string(forKey: lastConnectedUrband) {
+            let peripherals = centralManager.retrievePeripherals(withIdentifiers: [UUID(uuidString: uuidString)!])
+            
+            if let peripheral = peripherals.last {
+                connectedUrband = peripheral
+            }
+        }
+        
         centralManager.delegate = self
     }
     
@@ -87,6 +99,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func connect(_ urband: CBPeripheral) {
+        UserDefaults.standard.set(urband.identifier.uuidString, forKey: lastConnectedUrband)
+        UserDefaults.standard.synchronize()
+        
         centralManager.connect(urband, options: nil)
     }
     
@@ -145,6 +160,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         peripheral.delegate = self
         
         if let _ = peripheral.services {
+            UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: lastConnectedUrband)
+            
+            connectedUrband = peripheral
             delegate?.urbandReady(peripheral)
         }
         else {

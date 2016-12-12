@@ -19,6 +19,22 @@ class UrbandListController: UITableViewController {
         UrbandManager.sharedInstance.delegate = self
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        if let connectedUrband = UrbandManager.sharedInstance.connectedUrband {
+            let alert = UIAlertController(title: "UrbandManager",
+                                          message: "Ya se encuentra conectado a la Urband \(connectedUrband.identifier.uuidString)",
+                                          preferredStyle: .alert)
+            let connect = UIAlertAction(title: "Conectar", style: .cancel, handler: { _ in
+                UrbandManager.sharedInstance.connect(connectedUrband)
+            })
+            
+            alert.addAction(connect)
+            present(alert, animated: true, completion: nil)
+        }
+    }
+    
     // MARK: - UITableViewDataSource methods
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return urbands.count
