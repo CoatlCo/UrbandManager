@@ -66,14 +66,14 @@ extension UrbandListController: UrbandManagerDelegate {
             present(alert, animated: true, completion: nil)
         }
     }
-}
-
-extension UrbandListController: UrbandDelegate {
+    
     func newUrband(_ urband: CBPeripheral) {
         urbands.insert(urband, at: 0)
         tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
     }
-    
+}
+
+extension UrbandListController: UrbandDelegate {
     func urbandReady(_ urband: CBPeripheral) {
         UrbandManager.sharedInstance.readFA01(urband) { result in
             switch result {
