@@ -58,7 +58,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var services: [String]
     private var confirmClosure: ((UMGestureResponse) -> Void)?
     public weak var delegate: UrbandManagerDelegate?
-    private(set) var connectedUrband: CBPeripheral?
+    private(set) public var connectedUrband: CBPeripheral?
     
     // MARK: Singleton stuff
     static public let sharedInstance = UrbandManager()
