@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 	# 1
   s.name = 'UrbandManager'
-  s.version = '0.0.4'
+  s.version = '0.0.5'
   s.ios.deployment_target = '10.0'
   s.summary = 'By far the most fantastic urband manager I have seen in my entire life. No joke.'
  
