@@ -47,7 +47,11 @@ public enum UMGestureResponse {
 
 // MARK: - UrbandManagerDelegate protocol
 public protocol UrbandManagerDelegate: class {
-    func managerState(_ state: UMCentralState)
+    func manager(state s: UMCentralState)
+}
+
+// MARK: - UrbandDelegate protocol
+public protocol UrbandDelegate: class {
     func newUrband(_ urband: CBPeripheral)
     func urbandReady(_ urband: CBPeripheral)
 }
@@ -57,7 +61,8 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var centralManager: CBCentralManager
     private var services: [String]
     private var confirmClosure: ((UMGestureResponse) -> Void)?
-    public weak var delegate: UrbandManagerDelegate?
+    public weak var managerDelegate: UrbandManagerDelegate?
+    public weak var urbandDelegate: UrbandDelegate?
     private(set) public var connectedUrband: CBPeripheral?
     
     // MARK: Singleton stuff
@@ -146,13 +151,13 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             state = UMCentralState.problem(UMCentralError.unauthorized)
         }
         
-        delegate?.managerState(state)
+        managerDelegate?.manager(state: state)
     }
     
     public func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
         if let _ = advertisementData[CBAdvertisementDataLocalNameKey] {
             debugPrint(peripheral.identifier.uuidString)
-            delegate?.newUrband(peripheral)
+            urbandDelegate?.newUrband(peripheral)
         }
     }
     
@@ -163,7 +168,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: lastConnectedUrband)
             
             connectedUrband = peripheral
-            delegate?.urbandReady(peripheral)
+            urbandDelegate?.urbandReady(peripheral)
         }
         else {
             peripheral.discoverServices(nil)
@@ -182,7 +187,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         services.remove(at: index!)
         
         if services.count == 0 {
-            delegate?.urbandReady(peripheral)
+            urbandDelegate?.urbandReady(peripheral)
         }
     }
     

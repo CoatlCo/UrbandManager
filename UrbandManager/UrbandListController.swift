@@ -16,7 +16,7 @@ class UrbandListController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "urbandCellIdentifier")
-        UrbandManager.sharedInstance.delegate = self
+        UrbandManager.sharedInstance.managerDelegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -54,9 +54,10 @@ class UrbandListController: UITableViewController {
 }
 
 extension UrbandListController: UrbandManagerDelegate {
-    func managerState(_ state: UMCentralState) {
-        switch state {
+    func manager(state s: UMCentralState) {
+        switch s {
         case .ready:
+            UrbandManager.sharedInstance.urbandDelegate = self
             UrbandManager.sharedInstance.discover()
         default:
             let alert = UIAlertController(title: "Coatl Co.", message: "Problema con el bluetooth, posiblemente esté apagado", preferredStyle: .alert)
@@ -65,7 +66,9 @@ extension UrbandListController: UrbandManagerDelegate {
             present(alert, animated: true, completion: nil)
         }
     }
-    
+}
+
+extension UrbandListController: UrbandDelegate {
     func newUrband(_ urband: CBPeripheral) {
         urbands.insert(urband, at: 0)
         tableView.insertRows(at: [IndexPath(row: 0, section: 0)], with: .automatic)
@@ -74,27 +77,27 @@ extension UrbandListController: UrbandManagerDelegate {
     func urbandReady(_ urband: CBPeripheral) {
         UrbandManager.sharedInstance.readFA01(urband) { result in
             switch result {
-                case .success:
-                    debugPrint("The urband is working")
-                    let binaryToken: [UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
-                    UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
+            case .success:
+                debugPrint("The urband is working")
+                let binaryToken: [UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+                UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
                 
-                    delay(seconds: 3.0) {
-                        UrbandManager.sharedInstance.activateGestures(urband)
-                        
-                        delay(seconds: 2.0) {
-                            UrbandManager.sharedInstance.confirmGesture(urband) { res in
-                                switch res {
-                                case .success:
-                                    debugPrint("Confirm gesture was detected")
-                                case .failure:
-                                    debugPrint("Error while detecting gesture")
-                                }
+                delay(seconds: 3.0) {
+                    UrbandManager.sharedInstance.activateGestures(urband)
+                    
+                    delay(seconds: 2.0) {
+                        UrbandManager.sharedInstance.confirmGesture(urband) { res in
+                            switch res {
+                            case .success:
+                                debugPrint("Confirm gesture was detected")
+                            case .failure:
+                                debugPrint("Error while detecting gesture")
                             }
                         }
                     }
-                case .failure:
-                    debugPrint("The urband is not working correctly")
+                }
+            case .failure:
+                debugPrint("The urband is not working correctly")
             }
         }
     }
