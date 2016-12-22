@@ -54,6 +54,7 @@ public protocol UrbandManagerDelegate: class {
 // MARK: - UrbandDelegate protocol
 public protocol UrbandDelegate: class {
     func urbandReady(_ urband: CBPeripheral)
+    func disconnected(urband u: CBPeripheral)
 }
 
 // MARK: - UrbandManager Class
@@ -108,6 +109,10 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         UserDefaults.standard.synchronize()
         
         centralManager.connect(urband, options: nil)
+    }
+    
+    public func disconnect(_ urband: CBPeripheral) {
+        centralManager.cancelPeripheralConnection(urband)
     }
     
     public func readFA01(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
@@ -173,6 +178,13 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         else {
             peripheral.discoverServices(nil)
         }
+    }
+    
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        UserDefaults.standard.removeObject(forKey: lastConnectedUrband)
+        UserDefaults.standard.synchronize()
+        connectedUrband = nil
+        urbandDelegate?.disconnected(urband: peripheral)
     }
     
     // MARK: - CBPeripheralDelegate methods

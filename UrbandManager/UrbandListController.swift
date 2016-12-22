@@ -101,4 +101,10 @@ extension UrbandListController: UrbandDelegate {
             }
         }
     }
+    
+    func disconnected(urband u: CBPeripheral) {
+        let alert = UIAlertController(title: nil, message: "The urband \(u.identifier.uuidString) was disconnected successful", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
 }
