@@ -27,6 +27,11 @@ struct UMCharacteristics {
     static let ConfirmGesture: UInt8 = 0x16
 }
 
+enum CharState {
+    case none
+    case battery
+}
+
 public enum UMCentralState {
     case ready
     case problem(Error)
@@ -62,9 +67,12 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var centralManager: CBCentralManager
     private var services: [String]
     private var confirmClosure: ((UMGestureResponse) -> Void)?
+    private var batteryClosure: ((UInt8) -> Void)?
+    private var charState: CharState = .none
+    private(set) public var connectedUrband: CBPeripheral?
+    
     public weak var managerDelegate: UrbandManagerDelegate?
     public weak var urbandDelegate: UrbandDelegate?
-    private(set) public var connectedUrband: CBPeripheral?
     
     // MARK: Singleton stuff
     static public let sharedInstance = UrbandManager()
@@ -94,6 +102,14 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.delegate = self
     }
     
+    private func fillServices() {
+        services = [UMServices.DeviceInfoIdentifier,
+                    UMServices.BaterryServiceIdentifier,
+                    UMServices.UrbandServiceIdentifier,
+                    UMServices.HapticsServiceIdentifier,
+                    UMServices.SecurityServiceIdentifier]
+    }
+    
     // MARK: - External methods
     public func discover() {
         let services = [CBUUID(string: UMServices.DeviceInfoIdentifier),
@@ -113,6 +129,28 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     
     public func disconnect(_ urband: CBPeripheral) {
         centralManager.cancelPeripheralConnection(urband)
+    }
+    
+    public func readBattery(forUrband u: CBPeripheral, response: @escaping (UInt8) -> Void) {
+        guard let c2A19 = u.services?[4].characteristics?[0] else {
+            charState = .battery
+            batteryClosure = response
+            fillServices()
+            u.discoverServices(nil)
+            return
+        }
+
+        batteryClosure = response
+        u.setNotifyValue(true, for: c2A19)
+    }
+    
+    public func cancelBattery(forUrband u: CBPeripheral) {
+        if let c2A19 = u.services?[4].characteristics?[0] {
+            u.setNotifyValue(false, for: c2A19)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(u.identifier.uuidString)")
+        }
     }
     
     public func readFA01(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
@@ -195,11 +233,24 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        let index = services.index(of: service.uuid.uuidString)
-        services.remove(at: index!)
-        
-        if services.count == 0 {
-            urbandDelegate?.urbandReady(peripheral)
+        if charState != .none {
+            switch charState {
+            case .battery:
+                readBattery(forUrband: peripheral, response: batteryClosure!)
+            default:
+                debugPrint("There is no state")
+            }
+            
+            charState = .none
+        }
+        else {
+            if let index = services.index(of: service.uuid.uuidString) {
+                services.remove(at: index)
+            }
+            
+            if services.count == 0 {
+                urbandDelegate?.urbandReady(peripheral)
+            }
         }
     }
     
@@ -211,6 +262,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         
         let dataArray = data.withUnsafeBytes {
             Array(UnsafeBufferPointer<UInt8>(start: $0, count: data.count / MemoryLayout<UInt8>.size))
+        }
+        
+        if let bc = batteryClosure {
+            bc(dataArray.first!)
+            return
         }
         
         if let closure = confirmClosure {
