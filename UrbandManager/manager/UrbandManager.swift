@@ -265,6 +265,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
         
         if let bc = batteryClosure {
+            debugPrint("Battery value \(dataArray.first!)")
             bc(dataArray.first!)
             return
         }
