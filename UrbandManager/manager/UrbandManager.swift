@@ -264,20 +264,21 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             Array(UnsafeBufferPointer<UInt8>(start: $0, count: data.count / MemoryLayout<UInt8>.size))
         }
         
-        if let bc = batteryClosure {
-            debugPrint("Battery value \(dataArray.first!)")
-            bc(dataArray.first!)
-            return
-        }
-        
-        if let closure = confirmClosure {
-            guard let value = dataArray.first else {
-                closure(.failure)
-                confirmClosure = nil
+        switch characteristic.uuid.uuidString {
+        case "2A19":
+            if let bc = batteryClosure {
+                debugPrint("Battery value \(dataArray.first!)")
+                bc(dataArray.first!)
                 return
             }
-            
-            if characteristic.uuid.uuidString == "FA01" {
+        case "FA01":
+            if let closure = confirmClosure {
+                guard let value = dataArray.first else {
+                    closure(.failure)
+                    confirmClosure = nil
+                    return
+                }
+                
                 switch value {
                 case UMCharacteristics.UrbandReady:
                     debugPrint("The urband is ready and without problems")
@@ -291,7 +292,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                     debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
                 }
             }
+        default:
+            debugPrint("The characteristic \(characteristic.uuid.uuidString) is not defined yet")
         }
+        
+        
     }
 }
 
