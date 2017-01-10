@@ -30,6 +30,8 @@ struct UMCharacteristics {
 enum CharState {
     case none
     case battery
+    case ready
+    case gesture
 }
 
 public enum UMCentralState {
@@ -45,8 +47,13 @@ public enum UMCentralError: Error {
     case unauthorized
 }
 
-public enum UMGestureResponse {
+public enum UMDeviceStatus {
     case success
+    case failure
+}
+
+public enum UMGestureResponse {
+    case confirm
     case failure
 }
 
@@ -66,7 +73,8 @@ public protocol UrbandDelegate: class {
 public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
     private var services: [String]
-    private var confirmClosure: ((UMGestureResponse) -> Void)?
+    private var gestureClosure: ((UMGestureResponse) -> Void)?
+    private var readyClosure: ((UMDeviceStatus) -> Void)?
     private var batteryClosure: ((UInt8) -> Void)?
     private var charState: CharState = .none
     private(set) public var connectedUrband: CBPeripheral?
@@ -110,6 +118,28 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                     UMServices.SecurityServiceIdentifier]
     }
     
+    private func notifyChange(peripheral p: CBPeripheral, forCharacteristic optC: CBCharacteristic?, state: CharState) {
+        guard let characteristic = optC else {
+            charState = state
+            fillServices()
+            p.discoverServices(nil)
+            return
+        }
+        
+        p.setNotifyValue(true, for: characteristic)
+    }
+    
+    private func read(characteristic optC: CBCharacteristic?, fromPeripheral p: CBPeripheral, state: CharState) {
+        guard let characteristic = optC else {
+            charState = state
+            fillServices()
+            p.discoverServices(nil)
+            return
+        }
+        
+        p.readValue(for: characteristic)
+    }
+    
     // MARK: - External methods
     public func discover() {
         let services = [CBUUID(string: UMServices.DeviceInfoIdentifier),
@@ -132,16 +162,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func readBattery(forUrband u: CBPeripheral, response: @escaping (UInt8) -> Void) {
-        guard let c2A19 = u.services?[4].characteristics?[0] else {
-            charState = .battery
-            batteryClosure = response
-            fillServices()
-            u.discoverServices(nil)
-            return
-        }
-
         batteryClosure = response
-        u.setNotifyValue(true, for: c2A19)
+        let c2A19 = u.services?[4].characteristics?[0]
+        notifyChange(peripheral: u, forCharacteristic: c2A19, state: .battery)
     }
     
     public func cancelBattery(forUrband u: CBPeripheral) {
@@ -153,10 +176,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
-    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
-        let fa01 = urband.services![1].characteristics![0]
-        urband.readValue(for: fa01)
-        confirmClosure = response
+    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMDeviceStatus) -> Void) {
+        // FIXME: Create a readFA01 gesture just for checking the correct function of the urband
+        readyClosure = response
+        let cfa01 = urband.services?[1].characteristics?[0]
+        read(characteristic: cfa01, fromPeripheral: urband, state: .ready)
     }
     
     public func login(urband u: CBPeripheral, withToken token: [UInt8]) {
@@ -169,10 +193,19 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         urband.writeValue(Data(bytes: [0x00]), for: fa01, type: .withResponse)
     }
     
-    public func confirmGesture(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
-        let fa01 = urband.services![1].characteristics![0]
-        urband.setNotifyValue(true, for: fa01)
-        confirmClosure = response
+    public func notifyGestures(_ urband: CBPeripheral, response : @escaping (UMGestureResponse) -> Void) {
+        gestureClosure = response
+        let cfa01 = urband.services?[1].characteristics?[0]
+        notifyChange(peripheral: urband, forCharacteristic: cfa01, state: .gesture)
+    }
+    
+    public func cancelGesturesNotification(urband: CBPeripheral) {
+        if let c2A19 = urband.services?[1].characteristics?[0] {
+            urband.setNotifyValue(false, for: c2A19)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
     }
     
     // MARK: - CBCentralManagerDelegate methods
@@ -237,6 +270,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             switch charState {
             case .battery:
                 readBattery(forUrband: peripheral, response: batteryClosure!)
+            case .ready:
+                debugPrint("Implementar un closure específico para checar el status de la urband")
+                readFA01(peripheral, response: readyClosure!)
+            case .gesture:
+                notifyGestures(peripheral, response: gestureClosure!)
             default:
                 debugPrint("There is no state")
             }
@@ -272,26 +310,29 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 return
             }
         case "FA01":
-            if let closure = confirmClosure {
-                guard let value = dataArray.first else {
-                    closure(.failure)
-                    confirmClosure = nil
-                    return
-                }
-                
-                switch value {
-                case UMCharacteristics.UrbandReady:
-                    debugPrint("The urband is ready and without problems")
-                    closure(UMGestureResponse.success)
-                    confirmClosure = nil
-                case UMCharacteristics.ConfirmGesture:
-                    debugPrint("The urband confirm gesture was detected")
-                    closure(UMGestureResponse.success)
-                    confirmClosure = nil
-                default:
-                    debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
-                }
+            guard let value = dataArray.first else {
+                gestureClosure?(.failure)
+                gestureClosure = nil
+                return
             }
+            
+            debugPrint("Characteristic \(characteristic.uuid.uuidString) - value \(value)")
+
+            switch value {
+            case UMCharacteristics.UrbandReady:
+                debugPrint("The urband is ready and without problems")
+//                closure(UMGestureResponse.success)
+//                confirmClosure = nil
+            case UMCharacteristics.ConfirmGesture:
+                debugPrint("The urband confirm gesture was detected")
+                gestureClosure?(UMGestureResponse.confirm)
+//                confirmClosure = nil
+            default:
+                debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
+            }
+//            if let closure = confirmClosure {
+//                
+//            }
         default:
             debugPrint("The characteristic \(characteristic.uuid.uuidString) is not defined yet")
         }
