@@ -202,6 +202,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     public func cancelGesturesNotification(urband: CBPeripheral) {
         if let c2A19 = urband.services?[1].characteristics?[0] {
             urband.setNotifyValue(false, for: c2A19)
+            gestureClosure = nil
         }
         else {
             debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
@@ -321,8 +322,8 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             switch value {
             case UMCharacteristics.UrbandReady:
                 debugPrint("The urband is ready and without problems")
-//                closure(UMGestureResponse.success)
-//                confirmClosure = nil
+                readyClosure?(UMDeviceStatus.success)
+                readyClosure = nil
             case UMCharacteristics.ConfirmGesture:
                 debugPrint("The urband confirm gesture was detected")
                 gestureClosure?(UMGestureResponse.confirm)
