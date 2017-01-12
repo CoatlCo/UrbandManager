@@ -193,6 +193,15 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         urband.writeValue(Data(bytes: [0x00]), for: fa01, type: .withResponse)
     }
     
+    public func deactivateGestures(_ urband: CBPeripheral) {
+        if let cfa01 = urband.services?[1].characteristics?[0] {
+            urband.writeValue(Data(bytes: [0x01]), for: cfa01, type: .withResponse)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
+    }
+    
     public func notifyGestures(_ urband: CBPeripheral, response : @escaping (UMGestureResponse) -> Void) {
         gestureClosure = response
         let cfa01 = urband.services?[1].characteristics?[0]
