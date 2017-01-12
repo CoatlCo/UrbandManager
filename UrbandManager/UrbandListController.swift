@@ -86,9 +86,9 @@ extension UrbandListController: UrbandDelegate {
                     UrbandManager.sharedInstance.activateGestures(urband)
                     
                     delay(seconds: 2.0) {
-                        UrbandManager.sharedInstance.confirmGesture(urband) { res in
+                        UrbandManager.sharedInstance.notifyGestures(urband) { res in
                             switch res {
-                            case .success:
+                            case .confirm:
                                 debugPrint("Confirm gesture was detected")
                             case .failure:
                                 debugPrint("Error while detecting gesture")
@@ -100,5 +100,11 @@ extension UrbandListController: UrbandDelegate {
                 debugPrint("The urband is not working correctly")
             }
         }
+    }
+    
+    func disconnected(urband u: CBPeripheral) {
+        let alert = UIAlertController(title: nil, message: "The urband \(u.identifier.uuidString) was disconnected successful", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 }

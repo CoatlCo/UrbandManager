@@ -27,6 +27,13 @@ struct UMCharacteristics {
     static let ConfirmGesture: UInt8 = 0x16
 }
 
+enum CharState {
+    case none
+    case battery
+    case ready
+    case gesture
+}
+
 public enum UMCentralState {
     case ready
     case problem(Error)
@@ -40,8 +47,13 @@ public enum UMCentralError: Error {
     case unauthorized
 }
 
-public enum UMGestureResponse {
+public enum UMDeviceStatus {
     case success
+    case failure
+}
+
+public enum UMGestureResponse {
+    case confirm
     case failure
 }
 
@@ -54,16 +66,21 @@ public protocol UrbandManagerDelegate: class {
 // MARK: - UrbandDelegate protocol
 public protocol UrbandDelegate: class {
     func urbandReady(_ urband: CBPeripheral)
+    func disconnected(urband u: CBPeripheral)
 }
 
 // MARK: - UrbandManager Class
 public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
     private var services: [String]
-    private var confirmClosure: ((UMGestureResponse) -> Void)?
+    private var gestureClosure: ((UMGestureResponse) -> Void)?
+    private var readyClosure: ((UMDeviceStatus) -> Void)?
+    private var batteryClosure: ((UInt8) -> Void)?
+    private var charState: CharState = .none
+    private(set) public var connectedUrband: CBPeripheral?
+    
     public weak var managerDelegate: UrbandManagerDelegate?
     public weak var urbandDelegate: UrbandDelegate?
-    private(set) public var connectedUrband: CBPeripheral?
     
     // MARK: Singleton stuff
     static public let sharedInstance = UrbandManager()
@@ -93,6 +110,36 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.delegate = self
     }
     
+    private func fillServices() {
+        services = [UMServices.DeviceInfoIdentifier,
+                    UMServices.BaterryServiceIdentifier,
+                    UMServices.UrbandServiceIdentifier,
+                    UMServices.HapticsServiceIdentifier,
+                    UMServices.SecurityServiceIdentifier]
+    }
+    
+    private func notifyChange(peripheral p: CBPeripheral, forCharacteristic optC: CBCharacteristic?, state: CharState) {
+        guard let characteristic = optC else {
+            charState = state
+            fillServices()
+            p.discoverServices(nil)
+            return
+        }
+        
+        p.setNotifyValue(true, for: characteristic)
+    }
+    
+    private func read(characteristic optC: CBCharacteristic?, fromPeripheral p: CBPeripheral, state: CharState) {
+        guard let characteristic = optC else {
+            charState = state
+            fillServices()
+            p.discoverServices(nil)
+            return
+        }
+        
+        p.readValue(for: characteristic)
+    }
+    
     // MARK: - External methods
     public func discover() {
         let services = [CBUUID(string: UMServices.DeviceInfoIdentifier),
@@ -110,10 +157,30 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.connect(urband, options: nil)
     }
     
-    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
-        let fa01 = urband.services![1].characteristics![0]
-        urband.readValue(for: fa01)
-        confirmClosure = response
+    public func disconnect(_ urband: CBPeripheral) {
+        centralManager.cancelPeripheralConnection(urband)
+    }
+    
+    public func readBattery(forUrband u: CBPeripheral, response: @escaping (UInt8) -> Void) {
+        batteryClosure = response
+        let c2A19 = u.services?[4].characteristics?[0]
+        notifyChange(peripheral: u, forCharacteristic: c2A19, state: .battery)
+    }
+    
+    public func cancelBattery(forUrband u: CBPeripheral) {
+        if let c2A19 = u.services?[4].characteristics?[0] {
+            u.setNotifyValue(false, for: c2A19)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(u.identifier.uuidString)")
+        }
+    }
+    
+    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMDeviceStatus) -> Void) {
+        // FIXME: Create a readFA01 gesture just for checking the correct function of the urband
+        readyClosure = response
+        let cfa01 = urband.services?[1].characteristics?[0]
+        read(characteristic: cfa01, fromPeripheral: urband, state: .ready)
     }
     
     public func login(urband u: CBPeripheral, withToken token: [UInt8]) {
@@ -126,10 +193,20 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         urband.writeValue(Data(bytes: [0x00]), for: fa01, type: .withResponse)
     }
     
-    public func confirmGesture(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> Void) {
-        let fa01 = urband.services![1].characteristics![0]
-        urband.setNotifyValue(true, for: fa01)
-        confirmClosure = response
+    public func notifyGestures(_ urband: CBPeripheral, response : @escaping (UMGestureResponse) -> Void) {
+        gestureClosure = response
+        let cfa01 = urband.services?[1].characteristics?[0]
+        notifyChange(peripheral: urband, forCharacteristic: cfa01, state: .gesture)
+    }
+    
+    public func cancelGesturesNotification(urband: CBPeripheral) {
+        if let c2A19 = urband.services?[1].characteristics?[0] {
+            urband.setNotifyValue(false, for: c2A19)
+            gestureClosure = nil
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
     }
     
     // MARK: - CBCentralManagerDelegate methods
@@ -175,6 +252,13 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
+    public func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        UserDefaults.standard.removeObject(forKey: lastConnectedUrband)
+        UserDefaults.standard.synchronize()
+        connectedUrband = nil
+        urbandDelegate?.disconnected(urband: peripheral)
+    }
+    
     // MARK: - CBPeripheralDelegate methods
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         for s in peripheral.services! {
@@ -183,11 +267,29 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        let index = services.index(of: service.uuid.uuidString)
-        services.remove(at: index!)
-        
-        if services.count == 0 {
-            urbandDelegate?.urbandReady(peripheral)
+        if charState != .none {
+            switch charState {
+            case .battery:
+                readBattery(forUrband: peripheral, response: batteryClosure!)
+            case .ready:
+                debugPrint("Implementar un closure específico para checar el status de la urband")
+                readFA01(peripheral, response: readyClosure!)
+            case .gesture:
+                notifyGestures(peripheral, response: gestureClosure!)
+            default:
+                debugPrint("There is no state")
+            }
+            
+            charState = .none
+        }
+        else {
+            if let index = services.index(of: service.uuid.uuidString) {
+                services.remove(at: index)
+            }
+            
+            if services.count == 0 {
+                urbandDelegate?.urbandReady(peripheral)
+            }
         }
     }
     
@@ -201,28 +303,42 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             Array(UnsafeBufferPointer<UInt8>(start: $0, count: data.count / MemoryLayout<UInt8>.size))
         }
         
-        if let closure = confirmClosure {
+        switch characteristic.uuid.uuidString {
+        case "2A19":
+            if let bc = batteryClosure {
+                debugPrint("Battery value \(dataArray.first!)")
+                bc(dataArray.first!)
+                return
+            }
+        case "FA01":
             guard let value = dataArray.first else {
-                closure(.failure)
-                confirmClosure = nil
+                gestureClosure?(.failure)
+                gestureClosure = nil
                 return
             }
             
-            if characteristic.uuid.uuidString == "FA01" {
-                switch value {
-                case UMCharacteristics.UrbandReady:
-                    debugPrint("The urband is ready and without problems")
-                    closure(UMGestureResponse.success)
-                    confirmClosure = nil
-                case UMCharacteristics.ConfirmGesture:
-                    debugPrint("The urband confirm gesture was detected")
-                    closure(UMGestureResponse.success)
-                    confirmClosure = nil
-                default:
-                    debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
-                }
+            debugPrint("Characteristic \(characteristic.uuid.uuidString) - value \(value)")
+
+            switch value {
+            case UMCharacteristics.UrbandReady:
+                debugPrint("The urband is ready and without problems")
+                readyClosure?(UMDeviceStatus.success)
+                readyClosure = nil
+            case UMCharacteristics.ConfirmGesture:
+                debugPrint("The urband confirm gesture was detected")
+                gestureClosure?(UMGestureResponse.confirm)
+//                confirmClosure = nil
+            default:
+                debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
             }
+//            if let closure = confirmClosure {
+//                
+//            }
+        default:
+            debugPrint("The characteristic \(characteristic.uuid.uuidString) is not defined yet")
         }
+        
+        
     }
 }
 
