@@ -336,13 +336,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
             case UMCharacteristics.ConfirmGesture:
                 debugPrint("The urband confirm gesture was detected")
                 gestureClosure?(UMGestureResponse.confirm)
-//                confirmClosure = nil
             default:
                 debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
             }
-//            if let closure = confirmClosure {
-//                
-//            }
         default:
             debugPrint("The characteristic \(characteristic.uuid.uuidString) is not defined yet")
         }
