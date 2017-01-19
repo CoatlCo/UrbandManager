@@ -151,9 +151,6 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func connect(_ urband: CBPeripheral) {
-        UserDefaults.standard.set(urband.identifier.uuidString, forKey: lastConnectedUrband)
-        UserDefaults.standard.synchronize()
-        
         centralManager.connect(urband, options: nil)
     }
     
@@ -189,8 +186,12 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func activateGestures(_ urband: CBPeripheral) {
-        let fa01 = urband.services![1].characteristics![0]
-        urband.writeValue(Data(bytes: [0x00]), for: fa01, type: .withResponse)
+        if let cfa01 = urband.services?[1].characteristics?[0] {
+            urband.writeValue(Data(bytes: [0x00]), for: cfa01, type: .withResponse)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
     }
     
     public func deactivateGestures(_ urband: CBPeripheral) {
@@ -248,12 +249,12 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: lastConnectedUrband)
+        UserDefaults.standard.synchronize()
         peripheral.delegate = self
+        connectedUrband = peripheral
         
         if let _ = peripheral.services {
-            UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: lastConnectedUrband)
-            
-            connectedUrband = peripheral
             urbandDelegate?.urbandReady(peripheral)
         }
         else {
