@@ -17,6 +17,6 @@ extension Data {
 
 
 // MARK: - Generic functions
-func delay(seconds s: Double, completion: @escaping (Void) -> Void) {
+func delay(seconds s: Double, completion: @escaping () -> ()) {
     DispatchQueue.main.asyncAfter(deadline: .now() + s, execute: completion)
 }
