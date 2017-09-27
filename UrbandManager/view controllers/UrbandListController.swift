@@ -79,7 +79,7 @@ extension UrbandListController: UrbandDelegate {
             switch result {
             case .success:
                 debugPrint("The urband is working")
-                let binaryToken: [UInt8] = [0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]
+                let binaryToken: [UInt8] = [0x00, 0x00]
                 UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
                 
                 delay(seconds: 3.0) {
