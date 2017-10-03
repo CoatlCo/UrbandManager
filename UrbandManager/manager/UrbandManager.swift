@@ -79,7 +79,6 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     private var gestureClosure: ((UMGestureResponse) -> ())?
     private var readyClosure: ((UMDeviceStatus) -> ())?
     private var batteryClosure: ((UInt8) -> ())?
-    private var newValueClosure: ((UInt8) -> ())?
     private var charState: CharState = .none
     private(set) public var connectedUrband: CBPeripheral?
     
@@ -207,9 +206,8 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
-    public func notifyGestures(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> (), newValue: ((UInt8) -> ())? = nil) {
+    public func notifyGestures(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> ()) {
         gestureClosure = response
-        newValueClosure = newValue
         let cfa01 = urband.services?[1].characteristics?[0]
         notifyChange(peripheral: urband, forCharacteristic: cfa01, state: .gesture)
     }
@@ -290,7 +288,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 debugPrint("Implementar un closure específico para checar el status de la urband")
                 readFA01(peripheral, response: readyClosure!)
             case .gesture:
-                notifyGestures(peripheral, response: gestureClosure!, newValue: newValueClosure)
+                notifyGestures(peripheral, response: gestureClosure!)
             default:
                 debugPrint("There is no state")
             }
