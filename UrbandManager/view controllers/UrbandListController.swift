@@ -86,14 +86,18 @@ extension UrbandListController: UrbandDelegate {
                     UrbandManager.sharedInstance.activateGestures(urband)
                     
                     delay(seconds: 2.0) {
-                        UrbandManager.sharedInstance.notifyGestures(urband) { res in
+                        UrbandManager.sharedInstance.notifyGestures(urband, response: { res in
                             switch res {
                             case .confirm:
                                 debugPrint("Confirm gesture was detected")
+                            case .wrist:
+                                debugPrint("Wrist gesture was detected")
+                            case .doubleTap(let value):
+                                debugPrint("Value detected \(value)")
                             case .failure:
                                 debugPrint("Error while detecting gesture")
                             }
-                        }
+                        })
                     }
                 }
             case .failure:

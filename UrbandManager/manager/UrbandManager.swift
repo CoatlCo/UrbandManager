@@ -22,8 +22,8 @@ struct UMServices {
 
 struct UMCharacteristics {
     static let UrbandReady: UInt8 = 0x11
-    static let CompoundGesture: UInt8 = 0x14
-    static let DoubleTapGesture: UInt8 = 0x15
+    static let DoubleTapGesture: UInt8 = 0x14
+    static let ArmTwistGesture: UInt8 = 0x15
     static let ConfirmGesture: UInt8 = 0x16
 }
 
@@ -32,6 +32,7 @@ enum CharState {
     case battery
     case ready
     case gesture
+    case compoundGesture
 }
 
 public enum UMCentralState {
@@ -54,6 +55,8 @@ public enum UMDeviceStatus {
 
 public enum UMGestureResponse {
     case confirm
+    case wrist
+    case doubleTap(UInt8)
     case failure
 }
 
@@ -73,9 +76,9 @@ public protocol UrbandDelegate: class {
 public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
     private var services: [String]
-    private var gestureClosure: ((UMGestureResponse) -> Void)?
-    private var readyClosure: ((UMDeviceStatus) -> Void)?
-    private var batteryClosure: ((UInt8) -> Void)?
+    private var gestureClosure: ((UMGestureResponse) -> ())?
+    private var readyClosure: ((UMDeviceStatus) -> ())?
+    private var batteryClosure: ((UInt8) -> ())?
     private var charState: CharState = .none
     private(set) public var connectedUrband: CBPeripheral?
     
@@ -151,9 +154,6 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func connect(_ urband: CBPeripheral) {
-        UserDefaults.standard.set(urband.identifier.uuidString, forKey: lastConnectedUrband)
-        UserDefaults.standard.synchronize()
-        
         centralManager.connect(urband, options: nil)
     }
     
@@ -161,7 +161,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.cancelPeripheralConnection(urband)
     }
     
-    public func readBattery(forUrband u: CBPeripheral, response: @escaping (UInt8) -> Void) {
+    public func readBattery(forUrband u: CBPeripheral, response: @escaping (UInt8) -> ()) {
         batteryClosure = response
         let c2A19 = u.services?[4].characteristics?[0]
         notifyChange(peripheral: u, forCharacteristic: c2A19, state: .battery)
@@ -176,7 +176,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
-    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMDeviceStatus) -> Void) {
+    public func readFA01(_ urband: CBPeripheral, response: @escaping (UMDeviceStatus) -> ()) {
         // FIXME: Create a readFA01 gesture just for checking the correct function of the urband
         readyClosure = response
         let cfa01 = urband.services?[1].characteristics?[0]
@@ -189,11 +189,24 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func activateGestures(_ urband: CBPeripheral) {
-        let fa01 = urband.services![1].characteristics![0]
-        urband.writeValue(Data(bytes: [0x00]), for: fa01, type: .withResponse)
+        if let cfa01 = urband.services?[1].characteristics?[0] {
+            urband.writeValue(Data(bytes: [0x00]), for: cfa01, type: .withResponse)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
     }
     
-    public func notifyGestures(_ urband: CBPeripheral, response : @escaping (UMGestureResponse) -> Void) {
+    public func deactivateGestures(_ urband: CBPeripheral) {
+        if let cfa01 = urband.services?[1].characteristics?[0] {
+            urband.writeValue(Data(bytes: [0x01]), for: cfa01, type: .withResponse)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
+    }
+    
+    public func notifyGestures(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> ()) {
         gestureClosure = response
         let cfa01 = urband.services?[1].characteristics?[0]
         notifyChange(peripheral: urband, forCharacteristic: cfa01, state: .gesture)
@@ -239,12 +252,12 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     public func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: lastConnectedUrband)
+        UserDefaults.standard.synchronize()
         peripheral.delegate = self
+        connectedUrband = peripheral
         
         if let _ = peripheral.services {
-            UserDefaults.standard.set(peripheral.identifier.uuidString, forKey: lastConnectedUrband)
-            
-            connectedUrband = peripheral
             urbandDelegate?.urbandReady(peripheral)
         }
         else {
@@ -317,8 +330,6 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 return
             }
             
-            debugPrint("Characteristic \(characteristic.uuid.uuidString) - value \(value)")
-
             switch value {
             case UMCharacteristics.UrbandReady:
                 debugPrint("The urband is ready and without problems")
@@ -326,14 +337,23 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 readyClosure = nil
             case UMCharacteristics.ConfirmGesture:
                 debugPrint("The urband confirm gesture was detected")
+                
+                if charState == .compoundGesture {
+                    charState = .none
+                }
+                
                 gestureClosure?(UMGestureResponse.confirm)
-//                confirmClosure = nil
+            case UMCharacteristics.ArmTwistGesture:
+                debugPrint("The urband double arm twist gesture was detected")
+                gestureClosure?(UMGestureResponse.wrist)
+            case UMCharacteristics.DoubleTapGesture:
+                debugPrint("The double tap gesture was detected")
+                charState = .compoundGesture
             default:
-                debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
+                if charState == .compoundGesture {
+                    gestureClosure?(UMGestureResponse.doubleTap(value))
+                }
             }
-//            if let closure = confirmClosure {
-//                
-//            }
         default:
             debugPrint("The characteristic \(characteristic.uuid.uuidString) is not defined yet")
         }
