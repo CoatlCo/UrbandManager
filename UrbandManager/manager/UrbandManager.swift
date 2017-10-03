@@ -22,6 +22,7 @@ struct UMServices {
 
 struct UMCharacteristics {
     static let UrbandReady: UInt8 = 0x11
+    static let DoubleTapGesture: UInt8 = 0x14
     static let ArmTwistGesture: UInt8 = 0x15
     static let ConfirmGesture: UInt8 = 0x16
 }
@@ -31,6 +32,7 @@ enum CharState {
     case battery
     case ready
     case gesture
+    case compoundGesture
 }
 
 public enum UMCentralState {
@@ -54,6 +56,7 @@ public enum UMDeviceStatus {
 public enum UMGestureResponse {
     case confirm
     case wrist
+    case doubleTap(UInt8)
     case failure
 }
 
@@ -329,8 +332,6 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 return
             }
             
-            debugPrint("Characteristic \(characteristic.uuid.uuidString) - value \(value)")
-
             switch value {
             case UMCharacteristics.UrbandReady:
                 debugPrint("The urband is ready and without problems")
@@ -338,12 +339,22 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                 readyClosure = nil
             case UMCharacteristics.ConfirmGesture:
                 debugPrint("The urband confirm gesture was detected")
+                
+                if charState == .compoundGesture {
+                    charState = .none
+                }
+                
                 gestureClosure?(UMGestureResponse.confirm)
             case UMCharacteristics.ArmTwistGesture:
-                debugPrint("The urband double arm twist was detected")
+                debugPrint("The urband double arm twist gesture was detected")
                 gestureClosure?(UMGestureResponse.wrist)
+            case UMCharacteristics.DoubleTapGesture:
+                debugPrint("The double tap gesture was detected")
+                charState = .compoundGesture
             default:
-                debugPrint("Unrecognized value in characteristic \(characteristic.uuid.uuidString)")
+                if charState == .compoundGesture {
+                    gestureClosure?(UMGestureResponse.doubleTap(value))
+                }
             }
         default:
             debugPrint("The characteristic \(characteristic.uuid.uuidString) is not defined yet")

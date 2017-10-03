@@ -92,6 +92,8 @@ extension UrbandListController: UrbandDelegate {
                                 debugPrint("Confirm gesture was detected")
                             case .wrist:
                                 debugPrint("Wrist gesture was detected")
+                            case .doubleTap(let value):
+                                debugPrint("Value detected \(value)")
                             case .failure:
                                 debugPrint("Error while detecting gesture")
                             }
