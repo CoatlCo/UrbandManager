@@ -83,22 +83,28 @@ extension UrbandListController: UrbandDelegate {
                 UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
                 
                 delay(seconds: 3.0) {
-                    UrbandManager.sharedInstance.activateGestures(urband)
+                    // MARK: - Haptics
+                    // TODO: If you want to test haptics use this code
+                    UrbandManager.sharedInstance.activate(urband: urband, withColor: [255, 127, 0], repeat: 10)
                     
-                    delay(seconds: 2.0) {
-                        UrbandManager.sharedInstance.notifyGestures(urband, response: { res in
-                            switch res {
-                            case .confirm:
-                                debugPrint("Confirm gesture was detected")
-                            case .wrist:
-                                debugPrint("Wrist gesture was detected")
-                            case .doubleTap(let value):
-                                debugPrint("Value detected \(value)")
-                            case .failure:
-                                debugPrint("Error while detecting gesture")
-                            }
-                        })
-                    }
+                    // MARK: - Gestures
+                    // TODO: If you want to test gestures use this code
+//                    UrbandManager.sharedInstance.activateGestures(urband)
+//
+//                    delay(seconds: 2.0) {
+//                        UrbandManager.sharedInstance.notifyGestures(urband, response: { res in
+//                            switch res {
+//                            case .confirm:
+//                                debugPrint("Confirm gesture was detected")
+//                            case .wrist:
+//                                debugPrint("Wrist gesture was detected")
+//                            case .doubleTap(let value):
+//                                debugPrint("Value detected \(value)")
+//                            case .failure:
+//                                debugPrint("Error while detecting gesture")
+//                            }
+//                        })
+//                    }
                 }
             case .failure:
                 debugPrint("The urband is not working correctly")

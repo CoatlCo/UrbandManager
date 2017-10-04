@@ -222,6 +222,54 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
+    public func activate(urband: CBPeripheral, withColor colorRep: [Int], repeat times: Int) {
+        if colorRep.count != 3 {
+            fatalError("The color can¡t have more thant three components")
+        }
+        
+        if let cFB01 = urband.services?[2].characteristics?[0],
+            let cFB02 = urband.services?[2].characteristics?[1] {
+            let vibIntensity1: UInt8 = 0x32 // 50
+            let vibIntensity2: UInt8 = 0x64 // 100
+            let ledIntensity1: UInt8 = 0x32 // 50
+            let ledIntensity2: UInt8 = 0x64 // 100
+            let t1: UInt8 = 0x64
+            let t2: UInt8 = 0x64
+            let t3: UInt8 = 0x64
+            let t4: UInt8 = 0x64
+            let t5: UInt8 = 0x64
+            
+            let config: [UInt8] = [vibIntensity1, vibIntensity2, ledIntensity1, ledIntensity2, t1, t2, t3, t4, t5, UInt8(colorRep[0]), UInt8(colorRep[1]), UInt8(colorRep[2])]
+            urband.writeValue(Data(bytes: config), for: cFB02, type: .withResponse)
+            urband.writeValue(Data(bytes: [UInt8(times)]), for: cFB01, type: .withResponse)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
+    }
+    
+    public func testHaptics(urband: CBPeripheral) {
+        if let cFB01 = urband.services?[2].characteristics?[0],
+            let cFB02 = urband.services?[2].characteristics?[1] {
+            let vibIntensity1: UInt8 = 0x32 // 50
+            let vibIntensity2: UInt8 = 0x64 // 100
+            let ledIntensity1: UInt8 = 0x32 // 50
+            let ledIntensity2: UInt8 = 0x64 // 100
+            let t1: UInt8 = 0x64
+            let t2: UInt8 = 0x64
+            let t3: UInt8 = 0x64
+            let t4: UInt8 = 0x64
+            let t5: UInt8 = 0x64
+            
+            let config: [UInt8] = [vibIntensity1, vibIntensity2, ledIntensity1, ledIntensity2, t1, t2, t3, t4, t5, 0x00, 0xFF, 0x00]
+            urband.writeValue(Data(bytes: config), for: cFB02, type: .withResponse)
+            urband.writeValue(Data(bytes: [0x03]), for: cFB01, type: .withResponse)
+        }
+        else {
+            debugPrint("There are not discover characteristics in urband \(urband.identifier.uuidString)")
+        }
+    }
+    
     // MARK: - CBCentralManagerDelegate methods
     public func centralManagerDidUpdateState(_ central: CBCentralManager) {
         var state: UMCentralState
