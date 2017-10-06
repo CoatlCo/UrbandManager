@@ -12,6 +12,7 @@ import CoreBluetooth
 // MARK: - Constants
 let lastConnectedUrband = "last_connected_uuid"
 
+/// Defines the urband services identifiers
 struct UMServices {
     static let DeviceInfoIdentifier = "180A"
     static let BaterryServiceIdentifier = "180F"
@@ -20,6 +21,7 @@ struct UMServices {
     static let SecurityServiceIdentifier = "FC00"
 }
 
+/// Defines the urband characteristics values
 struct UMCharacteristics {
     static let UrbandReady: UInt8 = 0x11
     static let DoubleTapGesture: UInt8 = 0x14
@@ -27,6 +29,15 @@ struct UMCharacteristics {
     static let ConfirmGesture: UInt8 = 0x16
 }
 
+/**
+ Urband characteristic state used when it has not discovered yet anything from `CBPeripheral`
+ 
+ - none: There is not setted characteristic
+ - battery: Request battery characteristic `2A19`
+ - ready: Request urband ready state, a `11` hex value from `FA01` characteristic
+ - gesture: Request a gesture characteristic
+ - compoundGesture: Characteristic state used when a compound gesture was detected
+ */
 enum CharState {
     case none
     case battery
@@ -35,11 +46,26 @@ enum CharState {
     case compoundGesture
 }
 
+/**
+ Used to forward `CBCentralManagerDelegate` methods
+ 
+ - ready: There are not problems with `CBCentralManagerDelegate`
+ - problem: Forward specific `CBCentralManagerDelegate` error
+ */
 public enum UMCentralState {
     case ready
     case problem(Error)
 }
 
+/**
+ Represents `CBCentralManagerDelegate` error types
+ 
+ - poweredOff: The bluetooth device is turned off
+ - unknown: There was an unknown error with bluetooth device
+ - resetting: There was a resetting error in bluetooth device
+ - unsupported: The bluetooth device is unsupported
+ - unauthorized: The user unauthorized the bluetooth usage
+ */
 public enum UMCentralError: Error {
     case poweredOff
     case unknown
@@ -48,11 +74,24 @@ public enum UMCentralError: Error {
     case unauthorized
 }
 
+/**
+ Used to notice urband status
+ 
+ - success: The urband is ready to use it
+ - failure: The urband had a problem
+ */
 public enum UMDeviceStatus {
     case success
     case failure
 }
 
+/**
+ Represents the closure results for urband callbacks
+ 
+ - confirm: The double wrist twist gesture with `0x16` value
+ - wrist: The double arm twist gesture with `0x15` value
+ - doubleTap: The double tap gesture with `0x14` value
+ */
 public enum UMGestureResponse {
     case confirm
     case wrist
@@ -61,18 +100,43 @@ public enum UMGestureResponse {
 }
 
 // MARK: - UrbandManagerDelegate protocol
+/// Protocol to forward `CBCentralManagerDelegate` methods
 public protocol UrbandManagerDelegate: class {
+    /**
+     Returns the `CBCentralManagerDelegate` state
+     
+     - Parameter s: The final `CBCentralManagerDelegate` state represented by `UMCentralState`
+     */
     func manager(state s: UMCentralState)
+    
+    /**
+     Returns new urband found by `CBCentralManagerDelegate`
+     
+     - Parameter urband: The urband found
+     */
     func newUrband(_ urband: CBPeripheral)
 }
 
 // MARK: - UrbandDelegate protocol
+/// Notice the urband's state
 public protocol UrbandDelegate: class {
+    /**
+     Returns the new urband ready to use
+     
+     - Parameter urband: The actual urband
+     */
     func urbandReady(_ urband: CBPeripheral)
+    
+    /**
+     Returns the new urband disconnected
+     
+     - Parameter u: The actual urband
+     */
     func disconnected(urband u: CBPeripheral)
 }
 
 // MARK: - UrbandManager Class
+/// UrbandManager singleton class
 public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDelegate {
     private var centralManager: CBCentralManager
     private var services: [String]
@@ -88,6 +152,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     // MARK: Singleton stuff
     static public let sharedInstance = UrbandManager()
     
+    /**
+     Initialize the singleton variables
+     */
     private override init() {
         centralManager = CBCentralManager()
         services = [UMServices.DeviceInfoIdentifier,
@@ -100,6 +167,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         start()
     }
     
+    /**
+     Verifies if there is a last connected `CBPeripheral` after the singleton conforms `CBCentralManagerDelegate` methods
+     */
     private func start() {
         // We get the last connected urband device in the connectedUrband variable
         if let uuidString = UserDefaults.standard.string(forKey: lastConnectedUrband) {
@@ -113,6 +183,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.delegate = self
     }
     
+    /**
+     Creates an array with service values to discover them
+     */
     private func fillServices() {
         services = [UMServices.DeviceInfoIdentifier,
                     UMServices.BaterryServiceIdentifier,
@@ -121,6 +194,13 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
                     UMServices.SecurityServiceIdentifier]
     }
     
+    /**
+     Notifies value from any characteristic in `CBPeripheral`
+     
+     - Parameter p: The actual urband
+     - Parameter optC: The characteristic to notify
+     - Parameter state: The `CharState` to save if there are not services
+     */
     private func notifyChange(peripheral p: CBPeripheral, forCharacteristic optC: CBCharacteristic?, state: CharState) {
         guard let characteristic = optC else {
             charState = state
@@ -132,6 +212,13 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         p.setNotifyValue(true, for: characteristic)
     }
     
+    /**
+     Reads a value from any characteristic in `CBPeripheral`
+     
+     - Parameter optC: The characteristic to notify
+     - Parameter p: The actual urband
+     - Parameter state: The `CharState` to save if there are not services
+     */
     private func read(characteristic optC: CBCharacteristic?, fromPeripheral p: CBPeripheral, state: CharState) {
         guard let characteristic = optC else {
             charState = state
@@ -144,6 +231,9 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     // MARK: - External methods
+    /**
+     Starts to discover `CBPeripheral`s with the services given
+     */
     public func discover() {
         let services = [CBUUID(string: UMServices.DeviceInfoIdentifier),
                         CBUUID(string: UMServices.BaterryServiceIdentifier),
@@ -153,20 +243,41 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.scanForPeripherals(withServices: services, options: nil)
     }
     
+    /**
+     Connects an urband with the `CBCentralManager`
+     
+     - Parameter urband: The urband to connect
+     */
     public func connect(_ urband: CBPeripheral) {
         centralManager.connect(urband, options: nil)
     }
     
+    /**
+     Disconnects an urband from the `CBCentralManager`
+     
+     - Parameter urband: The urband to disconnect
+     */
     public func disconnect(_ urband: CBPeripheral) {
         centralManager.cancelPeripheralConnection(urband)
     }
     
+    /**
+     Reads the urband battery characteristic
+     
+     - Parameter u: `CBPeripheral` to read its battery
+     - Parameter response: Closure callback where the battery value is returned
+     */
     public func readBattery(forUrband u: CBPeripheral, response: @escaping (UInt8) -> ()) {
         batteryClosure = response
         let c2A19 = u.services?[4].characteristics?[0]
         notifyChange(peripheral: u, forCharacteristic: c2A19, state: .battery)
     }
     
+    /**
+     Cancel the battery characteristic notification
+     
+     - Parameter u: `CBPeripheral` to cancel the battery reading
+     */
     public func cancelBattery(forUrband u: CBPeripheral) {
         if let c2A19 = u.services?[4].characteristics?[0] {
             u.setNotifyValue(false, for: c2A19)
@@ -176,6 +287,12 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
+    /**
+     Determines if the urband is ready
+     
+     - Parameter urband: `CBPeripheral` to read its status
+     - Parameter response: Closure to callback the urband status
+     */
     public func readFA01(_ urband: CBPeripheral, response: @escaping (UMDeviceStatus) -> ()) {
         // FIXME: Create a readFA01 gesture just for checking the correct function of the urband
         readyClosure = response
@@ -183,11 +300,22 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         read(characteristic: cfa01, fromPeripheral: urband, state: .ready)
     }
     
+    /**
+     Sends a token for login with the urband, actually this value is an UInt8 array with two zero bytes
+     
+     - Parameter u: `CBPeripheral` to login with it
+     - Parameter token: UInt8 byte array with token value
+     */
     public func login(urband u: CBPeripheral, withToken token: [UInt8]) {
         let fc02 = u.services![3].characteristics![1]
         u.writeValue(Data(bytes: token), for: fc02, type: .withResponse)
     }
     
+    /**
+     Activates the urband gestures, they have to be activated
+     
+     - Parameter urband: The urband to activate its gestures
+     */
     public func activateGestures(_ urband: CBPeripheral) {
         if let cfa01 = urband.services?[1].characteristics?[0] {
             urband.writeValue(Data(bytes: [0x00]), for: cfa01, type: .withResponse)
@@ -197,6 +325,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
+    /**
+     Deactivates the urband gestures, they have to be deactivated after their use
+     
+     - Parameter urband: The urband to deactivate its gestures
+     */
     public func deactivateGestures(_ urband: CBPeripheral) {
         if let cfa01 = urband.services?[1].characteristics?[0] {
             urband.writeValue(Data(bytes: [0x01]), for: cfa01, type: .withResponse)
@@ -206,12 +339,23 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
+    /**
+     Notifies every gesture processed by an urband
+     
+     - Parameter urband: The urband to track its gestures
+     - Parameter response: Closure used to send gestures result
+     */
     public func notifyGestures(_ urband: CBPeripheral, response: @escaping (UMGestureResponse) -> ()) {
         gestureClosure = response
         let cfa01 = urband.services?[1].characteristics?[0]
         notifyChange(peripheral: urband, forCharacteristic: cfa01, state: .gesture)
     }
     
+    /**
+     Cancels the gesture closure callback
+     
+     - Parameter urband: The urband to cancel gestures callback
+     */
     public func cancelGesturesNotification(urband: CBPeripheral) {
         if let c2A19 = urband.services?[1].characteristics?[0] {
             urband.setNotifyValue(false, for: c2A19)
@@ -222,6 +366,13 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         }
     }
     
+    /**
+     Sends a haptic message to the urband
+     
+     - Parameter urband: The urband to activate heptics message
+     - Parameter colorRep: An UInt8 array to represent the color in HEX form
+     - Parameter times: The number of times that haptic event is going to repeat
+     */
     public func activate(urband: CBPeripheral, withColor colorRep: [Int], repeat times: Int) {
         if colorRep.count != 3 {
             fatalError("The color can¡t have more thant three components")
