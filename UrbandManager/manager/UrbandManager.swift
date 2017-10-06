@@ -150,7 +150,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     public weak var urbandDelegate: UrbandDelegate?
     
     // MARK: Singleton stuff
-    static public let sharedInstance = UrbandManager()
+    static public let shared = UrbandManager()
     
     /**
      Initialize the singleton variables

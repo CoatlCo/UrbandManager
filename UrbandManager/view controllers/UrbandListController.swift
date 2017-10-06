@@ -16,18 +16,18 @@ class UrbandListController: UITableViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "urbandCellIdentifier")
-        UrbandManager.sharedInstance.managerDelegate = self
+        UrbandManager.shared.managerDelegate = self
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
-        if let connectedUrband = UrbandManager.sharedInstance.connectedUrband {
+        if let connectedUrband = UrbandManager.shared.connectedUrband {
             let alert = UIAlertController(title: "UrbandManager",
                                           message: "Ya se encuentra conectado a la Urband \(connectedUrband.identifier.uuidString)",
                                           preferredStyle: .alert)
             let connect = UIAlertAction(title: "Conectar", style: .cancel, handler: { _ in
-                UrbandManager.sharedInstance.connect(connectedUrband)
+                UrbandManager.shared.connect(connectedUrband)
             })
             
             alert.addAction(connect)
@@ -49,7 +49,7 @@ class UrbandListController: UITableViewController {
     
     // MARK: - UITableViewDelegate methods
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        UrbandManager.sharedInstance.connect(urbands[indexPath.row])
+        UrbandManager.shared.connect(urbands[indexPath.row])
     }
 }
 
@@ -57,8 +57,8 @@ extension UrbandListController: UrbandManagerDelegate {
     func manager(state s: UMCentralState) {
         switch s {
         case .ready:
-            UrbandManager.sharedInstance.urbandDelegate = self
-            UrbandManager.sharedInstance.discover()
+            UrbandManager.shared.urbandDelegate = self
+            UrbandManager.shared.discover()
         default:
             let alert = UIAlertController(title: "Coatl Co.", message: "Problema con el bluetooth, posiblemente esté apagado", preferredStyle: .alert)
             let ok = UIAlertAction(title: "OK", style: .cancel, handler: nil)
@@ -75,24 +75,24 @@ extension UrbandListController: UrbandManagerDelegate {
 
 extension UrbandListController: UrbandDelegate {
     func urbandReady(_ urband: CBPeripheral) {
-        UrbandManager.sharedInstance.readFA01(urband) { result in
+        UrbandManager.shared.readFA01(urband) { result in
             switch result {
             case .success:
                 debugPrint("The urband is working")
                 let binaryToken: [UInt8] = [0x00, 0x00]
-                UrbandManager.sharedInstance.login(urband: urband, withToken: binaryToken)
+                UrbandManager.shared.login(urband: urband, withToken: binaryToken)
                 
                 delay(seconds: 3.0) {
                     // MARK: - Haptics
                     // TODO: If you want to test haptics use this code
-                    UrbandManager.sharedInstance.activate(urband: urband, withColor: [255, 127, 0], repeat: 10)
+                    UrbandManager.shared.activate(urband: urband, withColor: [255, 127, 0], repeat: 10)
                     
                     // MARK: - Gestures
                     // TODO: If you want to test gestures use this code
-//                    UrbandManager.sharedInstance.activateGestures(urband)
+//                    UrbandManager.shared.activateGestures(urband)
 //
 //                    delay(seconds: 2.0) {
-//                        UrbandManager.sharedInstance.notifyGestures(urband, response: { res in
+//                        UrbandManager.shared.notifyGestures(urband, response: { res in
 //                            switch res {
 //                            case .confirm:
 //                                debugPrint("Confirm gesture was detected")
