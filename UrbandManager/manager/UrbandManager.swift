@@ -244,7 +244,7 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
     }
     
     /// Cancels scanning for peripherals `CBCentralManager`
-    public func cancelDiscovering() {
+    public func stopDiscover() {
         centralManager.stopScan()
     }
     
