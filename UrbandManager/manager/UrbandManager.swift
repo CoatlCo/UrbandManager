@@ -243,6 +243,11 @@ public class UrbandManager: NSObject, CBCentralManagerDelegate, CBPeripheralDele
         centralManager.scanForPeripherals(withServices: services, options: nil)
     }
     
+    /// Cancels scanning for peripherals `CBCentralManager`
+    func cancelDiscovering() {
+        centralManager.stopScan()
+    }
+    
     /**
      Connects an urband with the `CBCentralManager`
      
